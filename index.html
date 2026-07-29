@@ -9,7 +9,6 @@
 :root {
   --ai-bg: #ccfbf1; --ai-border: #14b8a6; --ai-text: #0f766e;
   --human-bg: #dcfce7; --human-border: #22c55e; --human-text: #15803d;
-  --neutral-bg: #f1f5f9; --neutral-border: #94a3b8; --neutral-text: #475569;
   --visual-icon: #2563eb; --visual-typo: #7c3aed; --visual-pct: #047857;
   --panel-bg: #ffffff; --app-bg: #f4f5f7; --border: #e2e8f0; --ink: #1e293b; --muted: #64748b;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -57,9 +56,6 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .label-btn.ai.selected { background: var(--ai-bg); color: var(--ai-text); border-color: var(--ai-border); font-weight: 600; }
 .label-btn.human.selected { background: var(--human-bg); color: var(--human-text); border-color: var(--human-border); font-weight: 600; }
 .label-btn:disabled { opacity: .35; cursor: not-allowed; }
-.noai-row { margin-top: 8px; }
-.label-btn.noai { border-color: var(--neutral-border); }
-.label-btn.noai.selected { background: var(--neutral-bg); color: var(--neutral-text); font-weight: 600; }
 
 .visual-style-row { margin-bottom: 8px; }
 .visual-toggle {
@@ -120,7 +116,6 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 }
 .chip-text.ai { background: var(--ai-bg); color: var(--ai-text); border-color: var(--ai-border); }
 .chip-text.human { background: var(--human-bg); color: var(--human-text); border-color: var(--human-border); }
-.chip-text.noai { background: var(--neutral-bg); color: var(--neutral-text); border-color: var(--neutral-border); }
 .chip-plus { opacity: .5; font-weight: 400; }
 .chip-icon-emoji { font-size: 14px; line-height: 1; }
 /* Marks are boxed to the same optical size as an emoji glyph. */
@@ -313,7 +308,7 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
   </div>
   <div class="loc-tabs" id="locTabs"></div>
 </header>
-<div class="banner">Textual labels: pick one or two, then <b>Create</b> and drag the chip onto the board. Visual styles: picking a variant makes a chip immediately. Typography is a brush &mdash; arm a variant, then drag across any text in the canvas to style exactly that range.</div>
+<div class="banner">Textual labels: pick one or two, then <b>Create</b> and drag the chip onto the board. Visual styles: picking a variant makes a chip immediately, and an Icon / Percentage can also be attached to a label chip. Typography is a brush &mdash; arm a variant, then drag across any text in the canvas to style exactly that range.</div>
 
 <div class="layout">
   <div class="sidebar">
@@ -620,7 +615,7 @@ const FILE_CODE = [
 // ---------- chip rendering ----------
 function chipTextPartHTML(id) {
   const l = labelById[id];
-  const cls = l.part === 'ai' ? 'ai' : (l.part === 'human' ? 'human' : 'noai');
+  const cls = l.part === 'human' ? 'human' : 'ai';   // No AI (part null) is an AI-part label
   return `<span class="chip-text ${cls}">${l.text}</span>`;
 }
 
@@ -705,8 +700,7 @@ function renderLabelsPanel() {
     return `<div class="label-col"><h5>${title}</h5>` + list.map(l => {
       const sel = selectedText.includes(l.id);
       const enabled = canPick(l.id);
-      const c = l.part === null ? 'noai' : cls;
-      return `<button class="label-btn ${c} ${sel ? 'selected' : ''}" data-id="${l.id}" ${enabled ? '' : 'disabled'}>${l.text}</button>`;
+      return `<button class="label-btn ${cls} ${sel ? 'selected' : ''}" data-id="${l.id}" ${enabled ? '' : 'disabled'}>${l.text}</button>`;
     }).join('') + `</div>`;
   }
 
@@ -741,7 +735,8 @@ function renderLabelsPanel() {
   document.getElementById('createLabelBtn').addEventListener('click', () => {
     const state = labelComboState();
     if (!state.valid) return;
-    textChip = { text: selectedText.slice(), visual: [] };
+    // Icon / Percentage picks ride along; Typography never does — it is a brush.
+    textChip = { text: selectedText.slice(), visual: combinableVisual() };
     selectedText = [];
     renderLabelsPanel();
   });
@@ -768,15 +763,21 @@ function updateLabelComposer() {
   if (!caption) return;
   const state = labelComboState();
 
+  const withVisual = combinableVisual();
+  const visualNote = withVisual.length
+    ? ` &middot; with ${withVisual.map(v => escapeHTML(styleById[v.style].text)).join(' + ')}`
+    : '';
+
   if (selectedText.length === 0) {
-    caption.innerHTML = 'Pick one label, or two to combine.';
+    caption.innerHTML = 'Pick one label, or two to combine.' +
+      (withVisual.length ? ' A selected Icon / Percentage will be attached.' : '');
     preview.innerHTML = '';
   } else {
     const names = selectedText.map(id => labelById[id].text);
-    caption.innerHTML = selectedText.length === 2
+    caption.innerHTML = (selectedText.length === 2
       ? `Combined: <b>${escapeHTML(names[0])}</b> + <b>${escapeHTML(names[1])}</b>`
-      : `Single: <b>${escapeHTML(names[0])}</b>`;
-    preview.innerHTML = chipHTML({ text: selectedText, visual: [] });
+      : `Single: <b>${escapeHTML(names[0])}</b>`) + visualNote;
+    preview.innerHTML = chipHTML({ text: selectedText, visual: withVisual });
   }
   hintEl.textContent = state.hint;
   btn.disabled = !state.valid;
@@ -863,6 +864,7 @@ function renderVisualPanel() {
         if (styleId === 'typography') typoBrush = first;
       }
       renderVisualPanel();
+      updateLabelComposer();
       renderCanvas();
     });
   });
@@ -876,6 +878,7 @@ function renderVisualPanel() {
       if (entry) entry.variant = variantId;
       if (styleId === 'typography') typoBrush = variantId;
       renderVisualPanel();
+      updateLabelComposer();
       renderCanvas();
     });
   });
@@ -886,9 +889,17 @@ function renderVisualPanel() {
 // Icon and Percentage picks turn into a draggable chip the moment they are chosen —
 // no Create step, no history. Typography is not a chip ingredient: it arms a brush
 // that paints character ranges onto the real text in the canvas.
+// Visual parts that may be combined into a chip. Typography is excluded on purpose:
+// it is a brush that paints real text, not an ingredient of a chip.
+function combinableVisual() {
+  return selectedVisual
+    .filter(v => v.style !== 'typography')
+    .map(v => ({ style: v.style, variant: v.variant }));
+}
+
 function visualChipConfig() {
-  const parts = selectedVisual.filter(v => v.style !== 'typography');
-  return parts.length ? { text: [], visual: parts.map(v => ({ style: v.style, variant: v.variant })) } : null;
+  const parts = combinableVisual();
+  return parts.length ? { text: [], visual: parts } : null;
 }
 
 function updateVisualComposer() {
