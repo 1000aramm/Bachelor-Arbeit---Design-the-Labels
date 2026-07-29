@@ -125,96 +125,124 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 }
 .ghost-chip { position: fixed; pointer-events: none; z-index: 999; opacity: .9; transform: translate(-50%, -50%); }
 
-/* --- repo mock (GitHub look-alike, dark) --- */
-.mock-repo { overflow: visible; min-height: 0; }
-.gh-repo { background: #0d1117; color: #c9d1d9; font-size: 13px; border-radius: 10px; overflow: hidden; }
-.gh-globalnav { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: #010409; border-bottom: 1px solid #30363d; }
+/* --- GitHub look-alike mocks (light theme, modelled on real repo screenshots) --- */
+.mock-repo, .mock-folder, .mock-file { overflow: visible; min-height: 0; }
+.gh-repo { background: #ffffff; color: #1f2328; font-size: 13px; border-radius: 10px; overflow: hidden; border: 1px solid #d0d7de; }
+.gh-globalnav { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: #ffffff; border-bottom: 1px solid #d0d7de; }
 .gh-octicon { font-size: 20px; }
 .gh-crumb { font-size: 15px; }
 .gh-crumb b { font-weight: 600; }
-.gh-chev { color: #8b949e; font-size: 10px; }
-.gh-search { flex: 1; max-width: 380px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 6px 10px; color: #8b949e; font-size: 12px; }
-.gh-navicons { margin-left: auto; display: flex; align-items: center; gap: 14px; }
-.gh-avatar { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg,#f97316,#7c3aed); display: inline-block; }
+.gh-chev { color: #656d76; font-size: 10px; }
+.gh-search { flex: 1; max-width: 380px; background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; padding: 6px 10px; color: #656d76; font-size: 12px; }
+.gh-navicons { margin-left: auto; display: flex; align-items: center; gap: 14px; color: #656d76; }
+.gh-avatar { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg,#f97316,#7c3aed); display: inline-block; flex-shrink: 0; }
 .gh-avatar.sm { width: 16px; height: 16px; }
 
-.gh-subnav { display: flex; gap: 18px; padding: 0 16px; border-bottom: 1px solid #30363d; font-size: 13px; color: #8b949e; overflow-x: auto; }
+.gh-subnav { display: flex; gap: 18px; padding: 0 16px; border-bottom: 1px solid #d0d7de; font-size: 13px; color: #656d76; overflow-x: auto; }
 .gh-subnav span { padding: 10px 2px; cursor: default; white-space: nowrap; }
-.gh-subnav span.active { color: #c9d1d9; border-bottom: 2px solid #f78166; font-weight: 600; }
+.gh-subnav span.active { color: #1f2328; border-bottom: 2px solid #fd8c73; font-weight: 600; }
 
 .gh-titlebar { display: flex; align-items: center; gap: 8px; padding: 14px 16px 8px; flex-wrap: wrap; position: relative; }
-.gh-title { font-size: 20px; font-weight: 600; color: #58a6ff; }
-.gh-visibility { font-size: 11px; border: 1px solid #30363d; border-radius: 999px; padding: 1px 8px; color: #8b949e; }
+.gh-title { font-size: 20px; font-weight: 600; color: #0969da; }
+.gh-visibility { font-size: 11px; border: 1px solid #d0d7de; border-radius: 999px; padding: 1px 8px; color: #656d76; }
 .gh-title-spacer { flex: 1; }
-.gh-titlebar .gh-btn { font-size: 12px; border: 1px solid #30363d; border-radius: 6px; padding: 4px 10px; background: #21262d; color: #c9d1d9; cursor: default; }
+.gh-titlebar .gh-btn { font-size: 12px; border: 1px solid #d0d7de; border-radius: 6px; padding: 4px 10px; background: #f6f8fa; color: #1f2328; cursor: default; }
 .gh-titlebar .gh-btn b { font-weight: 600; }
 
-.gh-controls { display: flex; align-items: center; gap: 8px; padding: 8px 16px; flex-wrap: wrap; }
-.gh-branch-btn, .gh-ctrl-muted, .gh-gotofile { font-size: 12px; border: 1px solid #30363d; border-radius: 6px; padding: 5px 10px; background: #21262d; color: #c9d1d9; }
-.gh-ctrl-muted { background: transparent; color: #8b949e; border-color: transparent; }
-.gh-gotofile { color: #8b949e; }
+.gh-controls, .gh-crumbrow { display: flex; align-items: center; gap: 8px; padding: 8px 16px; flex-wrap: wrap; }
+.gh-branch-btn, .gh-ctrl-muted, .gh-gotofile, .gh-sidebtn { font-size: 12px; border: 1px solid #d0d7de; border-radius: 6px; padding: 5px 10px; background: #f6f8fa; color: #1f2328; }
+.gh-ctrl-muted { background: transparent; color: #656d76; border-color: transparent; }
+.gh-gotofile { color: #656d76; }
 .gh-spacer { flex: 1; }
 .gh-controls .gh-addfile { cursor: pointer; }
-.gh-controls .gh-code-btn { background: #238636; border-color: #238636; color: #fff; font-weight: 600; }
+.gh-controls .gh-code-btn, .gh-codepanel .gh-code-btn { background: #1f883d; border-color: #1f883d; color: #fff; font-weight: 600; }
+.gh-crumb-path { font-size: 14px; color: #656d76; }
+.gh-crumb-path a { color: #0969da; cursor: default; }
+.gh-crumb-path b { color: #1f2328; font-weight: 600; }
+.gh-copyicon { color: #656d76; cursor: default; }
 
 .gh-addfile-composer { display: flex; align-items: center; gap: 6px; padding: 0 16px 10px; flex-wrap: wrap; }
-.gh-addfile-composer input { flex: 1; max-width: 240px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 5px 8px; color: #c9d1d9; font-size: 12px; }
-.gh-addfile-composer input.err { border-color: #f85149; }
-.gh-addfile-composer button { font-size: 12px; border: 1px solid #30363d; border-radius: 6px; padding: 5px 10px; background: #21262d; color: #c9d1d9; cursor: pointer; }
-#ghNewFileConfirm { background: #238636; border-color: #238636; color: #fff; }
-.gh-addfile-err { font-size: 11px; color: #f85149; width: 100%; }
+.gh-addfile-composer input { flex: 1; max-width: 240px; background: #ffffff; border: 1px solid #d0d7de; border-radius: 6px; padding: 5px 8px; color: #1f2328; font-size: 12px; }
+.gh-addfile-composer input.err { border-color: #cf222e; }
+.gh-addfile-composer button { font-size: 12px; border: 1px solid #d0d7de; border-radius: 6px; padding: 5px 10px; background: #f6f8fa; color: #1f2328; cursor: pointer; }
+#ghNewFileConfirm { background: #1f883d; border-color: #1f883d; color: #fff; }
+.gh-addfile-err { font-size: 11px; color: #cf222e; width: 100%; }
 
-.gh-commitrow { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid #30363d; border-radius: 6px 6px 0 0; margin: 0 16px; background: #161b22; font-size: 12.5px; }
-.gh-commitrow .gh-muted { color: #8b949e; }
-.gh-commits-link { color: #58a6ff; font-size: 12px; }
+.gh-commitrow, .gh-commitrow2 { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid #d0d7de; border-radius: 6px 6px 0 0; margin: 0 16px; background: #f6f8fa; font-size: 12.5px; }
+.gh-commitrow .gh-muted, .gh-commitrow2 .gh-muted { color: #656d76; }
+.gh-commits-link { color: #0969da; font-size: 12px; }
 
-.gh-body { display: flex; margin: 0 16px; border: 1px solid #30363d; border-top: none; }
+.gh-body { display: flex; margin: 0 16px; border: 1px solid #d0d7de; border-top: none; }
 .gh-filelist { flex: 1; min-width: 0; }
-.gh-file-row { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid #21262d; font-size: 12.5px; position: relative; }
+.gh-file-row { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid #d8dee4; font-size: 12.5px; position: relative; }
 .gh-file-row:last-child { border-bottom: none; }
-.gh-file-row:hover { background: #161b22; }
+.gh-file-row:hover { background: #f6f8fa; }
 .gh-file-icon { width: 16px; text-align: center; flex-shrink: 0; }
-.gh-file-name { color: #58a6ff; flex-shrink: 0; }
-.gh-file-msg { color: #8b949e; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 12px; }
-.gh-file-time { color: #8b949e; flex-shrink: 0; }
-.gh-new-tag { font-size: 9.5px; background: #238636; color: #fff; border-radius: 999px; padding: 1px 6px; margin-left: 6px; }
-.gh-file-del { display: none; margin-left: 4px; flex-shrink: 0; }
+.gh-file-name { color: #0969da; flex-shrink: 0; }
+.gh-file-msg { color: #656d76; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 12px; }
+.gh-file-time { color: #656d76; flex-shrink: 0; }
+.gh-new-tag { font-size: 9.5px; background: #1f883d; color: #fff; border-radius: 999px; padding: 1px 6px; margin-left: 6px; }
+.gh-file-del { display: none; margin-left: 4px; flex-shrink: 0; border: none; background: none; color: #cf222e; cursor: pointer; }
 .gh-file-row:hover .gh-file-del { display: inline-flex; }
-.gh-row-chip { margin-left: 6px; flex-shrink: 0; }
 
-.gh-sidebar { width: 260px; flex-shrink: 0; padding: 14px 16px; border-left: 1px solid #30363d; }
+.gh-sidebar { width: 260px; flex-shrink: 0; padding: 14px 16px; border-left: 1px solid #d0d7de; }
 .gh-sidebar h4 { font-size: 14px; margin: 10px 0 6px; display: flex; align-items: center; gap: 6px; }
 .gh-sidebar h4:first-child { margin-top: 0; }
-.gh-sidebar .gh-muted { color: #8b949e; font-size: 12.5px; }
-.gh-sidelinks div { font-size: 12.5px; padding: 4px 0; color: #c9d1d9; }
-.gh-sidebar hr { border: none; border-top: 1px solid #30363d; margin: 12px 0; }
-.gh-langbar { height: 8px; border-radius: 4px; overflow: hidden; display: flex; background: #21262d; }
-.gh-langlegend { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 6px; color: #c9d1d9; }
+.gh-sidebar .gh-muted { color: #656d76; font-size: 12.5px; }
+.gh-sidebar a { color: #0969da; font-size: 12.5px; text-decoration: none; }
+.gh-sidelinks div { font-size: 12.5px; padding: 4px 0; color: #1f2328; }
+.gh-count-badge { font-size: 11px; background: #eef1f4; border-radius: 999px; padding: 0 6px; color: #656d76; font-weight: 600; }
+.gh-contributor-row { display: flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 4px 0; color: #1f2328; }
+.gh-sidebar hr { border: none; border-top: 1px solid #d0d7de; margin: 12px 0; }
+.gh-langbar { height: 8px; border-radius: 4px; overflow: hidden; display: flex; background: #f6f8fa; }
+.gh-langlegend { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 6px; color: #1f2328; }
 .gh-langlegend .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-.gh-readme { margin: 16px; border: 1px solid #30363d; border-radius: 6px; overflow: hidden; }
-.gh-readme-tab { padding: 10px 14px; border-bottom: 1px solid #30363d; font-size: 13px; }
+.gh-readme { margin: 16px; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; }
+.gh-readme-tab { padding: 10px 14px; border-bottom: 1px solid #d0d7de; font-size: 13px; background: #f6f8fa; }
 .gh-readme-body { padding: 16px 20px; }
-.gh-readme-body h2 { margin: 0 0 10px; font-size: 22px; border-bottom: 1px solid #30363d; padding-bottom: 8px; }
+.gh-readme-body h2 { margin: 0 0 10px; font-size: 22px; border-bottom: 1px solid #d0d7de; padding-bottom: 8px; }
 
-/* --- folder mock --- */
-.mock-folder { display: flex; }
-.mock-folder-sidebar { width: 230px; border-right: 1px solid var(--border); padding: 10px 0; }
-.tree-item { font-size: 12.5px; padding: 5px 14px; color: var(--ink); }
-.tree-item.indent { padding-left: 30px; }
-.tree-item.indent2 { padding-left: 46px; color: var(--muted); }
-.mock-folder-main { flex: 1; padding: 16px; }
-.mock-folder-main h4 { margin: 0 0 6px; font-size: 14px; }
-.mock-folder-main .muted { font-size: 12px; color: var(--muted); }
+/* --- folder mock: file table --- */
+.gh-table { margin: 0 16px 16px; border: 1px solid #d0d7de; border-top: none; border-radius: 0 0 6px 6px; }
+.gh-table-head { display: flex; padding: 6px 12px; font-size: 12px; color: #656d76; font-weight: 600; border-bottom: 1px solid #d0d7de; background: #f6f8fa; }
+.gh-table-head span:nth-child(1) { flex: 1; }
+.gh-table-head span:nth-child(2) { flex: 2; }
+.gh-table-head span:nth-child(3) { width: 110px; text-align: right; }
+.gh-table-row { display: flex; align-items: center; padding: 7px 12px; font-size: 12.5px; border-bottom: 1px solid #d8dee4; position: relative; }
+.gh-table-row:last-child { border-bottom: none; }
+.gh-table-row:hover { background: #f6f8fa; }
+.gh-table-name { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.gh-name-text { color: #0969da; }
+.gh-table-msg { flex: 2; color: #656d76; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gh-table-time { width: 110px; text-align: right; color: #656d76; flex-shrink: 0; }
 
-/* --- file mock --- */
-.mock-file-tab { padding: 8px 16px; border-bottom: 1px solid var(--border); font-size: 12.5px; color: var(--muted); background: #f8fafc; }
+/* --- file mock: code toolbar / panel --- */
+.gh-codepanel { margin: 0 16px 16px; border: 1px solid #d0d7de; border-top: none; border-radius: 0 0 6px 6px; overflow: hidden; }
+.gh-codetoolbar { display: flex; align-items: center; gap: 14px; padding: 8px 14px; border-bottom: 1px solid #d0d7de; background: #f6f8fa; font-size: 12.5px; }
+.gh-codetab { color: #656d76; cursor: default; padding-bottom: 2px; }
+.gh-codetab.active { color: #1f2328; font-weight: 600; border-bottom: 2px solid #fd8c73; }
+.gh-codestats { color: #656d76; font-size: 12px; }
+.gh-toolicon { color: #656d76; font-size: 12px; }
+.gh-codepanel .gh-code-btn { font-size: 12px; padding: 3px 9px; border-radius: 6px; }
+.gh-code-more { padding: 8px 16px; font-size: 11.5px; color: #8c959f; font-style: italic; border-top: 1px dashed #d0d7de; }
+
+/* --- file mock: code lines --- */
 .mock-code { padding: 6px 0; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; }
-.code-line { display: flex; padding: 3px 16px; border-radius: 4px; position: relative; }
-.code-line:hover { background: #f8fafc; }
-.code-line .ln { width: 26px; color: #cbd5e1; user-select: none; flex-shrink: 0; }
-.code-line .code { white-space: pre; color: #334155; }
-.code-line .line-tag { position: absolute; right: 14px; top: 2px; font-size: 9.5px; padding: 1px 6px; border-radius: 999px; }
+.code-line { display: flex; align-items: center; padding: 3px 16px; border-radius: 4px; position: relative; }
+.code-line:hover { background: #f6f8fa; }
+.code-line .ln { width: 30px; color: #8c959f; user-select: none; flex-shrink: 0; }
+.code-line .code { white-space: pre; color: #1f2328; }
+.code-line .tok-kw { color: #cf222e; }
+.code-line .tok-cm { color: #6e7781; }
+
+/* --- shared row/line annotation (typography restyles the real text; other visual styles attach as a badge) --- */
+.row-typo-tag { margin-left: 8px; flex-shrink: 0; font-size: 10.5px; font-weight: 600; color: #7c3aed; background: #f3e8ff; border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+.row-chip-badge { margin-left: 8px; flex-shrink: 0; }
+.row-remove-x { cursor: pointer; margin-left: 4px; opacity: .6; }
+.typo-color { color: #7c3aed !important; font-weight: 700; }
+.typo-font { font-style: italic; color: #7c3aed !important; }
+.typo-highlight { background: #ede9fe; border-radius: 4px; padding: 1px 5px; }
 
 </style>
 </head>
@@ -227,7 +255,7 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
   </div>
   <div class="loc-tabs" id="locTabs"></div>
 </header>
-<div class="banner">Repository canvas is modelled on a real GitHub repo page (dark theme, file list, About/Releases/Packages/Languages). Folder and File canvases are still simplified placeholders.</div>
+<div class="banner">All three canvases are modelled on real GitHub screenshots (light theme). Drag a Typography chip onto a filename or code line to restyle that text directly — other chips attach as a small badge next to it.</div>
 
 <div class="layout">
   <div class="sidebar">
@@ -421,28 +449,26 @@ const LOCATIONS = [
   { id: 'file', label: 'File' },
 ];
 
-const FILE_LINES = [
-  "function calculateTotal(items) {",
-  "  let total = 0;",
-  "  for (const item of items) {",
-  "    total += item.price * item.qty;",
-  "  }",
-  "  return total;",
-  "}",
-  "",
-  "export function formatCurrency(value) {",
-  "  return `$${value.toFixed(2)}`;",
-  "}",
-];
-
 // ---------- state ----------
 let selectedText = [];   // up to 2 label ids
 let selectedVisual = []; // up to 2 {style, variant}
 let activeLocation = 'repo';
 let chipsByLocation = { repo: [], folder: [], file: [] };
-let fileLineAnnotations = {}; // lineIndex -> {config}
-let repoRowAnnotations = {};  // fileName -> {config}
+let fileLineAnnotations = {};   // lineIndex -> {config}
+let repoRowAnnotations = {};    // fileName -> {config}
+let folderRowAnnotations = {};  // fileName -> {config}
 let chipSeq = 1;
+
+function fileIcon(name) {
+  const n = name.toLowerCase();
+  if (n.startsWith('agent')) return '🤖';
+  if (n.endsWith('.md')) return '📘';
+  if (n.endsWith('.pdf')) return '📕';
+  if (n.endsWith('.yml') || n.endsWith('.yaml')) return '🛠️';
+  if (n.endsWith('.json') || n.endsWith('.properties')) return '🧩';
+  if (n.endsWith('.kt')) return '🔷';
+  return '📄';
+}
 
 // ---------- repo mock data (modelled on a real repo screenshot) ----------
 const REPO_META = {
@@ -453,6 +479,7 @@ const REPO_META = {
   lastCommitMsg: 'Delete Faraway', lastCommitHash: '2d081fc', lastCommitTime: '5 months ago', commits: 3,
   language: 'Kotlin',
   readmeTitle: 'SoPra Projekt 2', readmeSub: 'Wichtige Links',
+  contributors: ['1000aramm', 'happzday1'],
 };
 let repoFiles = [
   { name: 'gradle/wrapper', dir: true, msg: 'Initial commit', time: '5 months ago' },
@@ -464,6 +491,8 @@ let repoFiles = [
   { name: 'detektConfig.yml', dir: false, msg: 'Initial commit', time: '5 months ago' },
   { name: 'gradle.properties', dir: false, msg: 'Initial commit', time: '5 months ago' },
   { name: 'gradlew', dir: false, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'gradlew.bat', dir: false, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'settings.gradle.kts', dir: false, msg: 'Initial commit', time: '5 months ago' },
   { name: 'test.txt', dir: false, msg: 'Initial commit', time: '5 months ago' },
 ];
 // GitHub sorts tree entries this way: directories before files, each group in raw
@@ -475,16 +504,54 @@ function sortRepoFiles() {
     return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
   });
 }
-function fileIcon(name) {
-  const n = name.toLowerCase();
-  if (n.startsWith('agent')) return '🤖';
-  if (n.endsWith('.md')) return '📘';
-  if (n.endsWith('.pdf')) return '📕';
-  if (n.endsWith('.yml') || n.endsWith('.yaml')) return '🛠️';
-  if (n.endsWith('.json') || n.endsWith('.properties')) return '🧩';
-  return '📄';
-}
 let addFileComposerOpen = false;
+
+// ---------- folder mock data (modelled on a real src/main/kotlin screenshot) ----------
+const FOLDER_META = {
+  branch: 'main', crumbs: ['Sopra', 'src', 'main', 'kotlin'],
+  committer: 'happzday1', commitMsg: 'Initial commit', hash: 'ee3bf8a', time: '5 months ago',
+};
+const folderEntries = [
+  { name: '..', dir: true, parent: true },
+  { name: 'entity', dir: true, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'gui', dir: true, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'service', dir: true, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'Main.kt', dir: false, msg: 'Initial commit', time: '5 months ago' },
+];
+
+// ---------- file mock data (modelled on a real EndGameScene.kt screenshot) ----------
+const FILE_META = {
+  branch: 'main', crumbs: ['Sopra', 'src', 'main', 'kotlin', 'gui'], fileName: 'EndGameScene.kt',
+  committer: 'happzday1', commitMsg: 'Initial commit', hash: 'ee3bf8a', time: '5 months ago',
+  lines: 210, loc: 190, size: '5.95 KB',
+};
+const FILE_CODE = [
+  { code: 'package gui', kind: 'kw' },
+  { code: '', kind: '' },
+  { code: 'import gui.components.PlayerGamePane', kind: 'kw' },
+  { code: 'import service.Refreshable', kind: 'kw' },
+  { code: 'import service.RootService', kind: 'kw' },
+  { code: 'import tools.aqua.bgw.components.ComponentView', kind: 'kw' },
+  { code: 'import tools.aqua.bgw.components.layoutviews.Pane', kind: 'kw' },
+  { code: 'import tools.aqua.bgw.components.uicomponents.Button', kind: 'kw' },
+  { code: 'import tools.aqua.bgw.components.uicomponents.Label', kind: 'kw' },
+  { code: 'import tools.aqua.bgw.core.BoardGameScene', kind: 'kw' },
+  { code: 'import tools.aqua.bgw.core.Color', kind: 'kw' },
+  { code: 'import tools.aqua.bgw.util.Font', kind: 'kw' },
+  { code: 'import tools.aqua.bgw.visual.ColorVisual', kind: 'kw' },
+  { code: 'import tools.aqua.bgw.visual.ImageVisual', kind: 'kw' },
+  { code: '', kind: '' },
+  { code: '/**', kind: 'cm' },
+  { code: ' * Scene that represents the end of a Faraway game.', kind: 'cm' },
+];
+function renderCodeLine(line) {
+  if (line.kind === 'kw') {
+    const sp = line.code.indexOf(' ');
+    return `<span class="tok-kw">${escapeHTML(line.code.slice(0, sp))}</span>${escapeHTML(line.code.slice(sp))}`;
+  }
+  if (line.kind === 'cm') return `<span class="tok-cm">${escapeHTML(line.code)}</span>`;
+  return escapeHTML(line.code);
+}
 
 // ---------- validation of current build selection ----------
 function currentComboState() {
@@ -788,22 +855,28 @@ function dropChip(config, clientX, clientY) {
   const rect = mock.getBoundingClientRect();
   if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return;
 
-  if (activeLocation === 'file' && config.visual.some(v => v.style === 'typography')) {
-    const under = document.elementFromPoint(clientX, clientY);
+  const under = document.elementFromPoint(clientX, clientY);
+
+  if (activeLocation === 'file') {
     const lineEl = under && under.closest ? under.closest('.code-line') : null;
     if (lineEl) {
-      const idx = parseInt(lineEl.dataset.line, 10);
-      fileLineAnnotations[idx] = { config };
+      fileLineAnnotations[parseInt(lineEl.dataset.line, 10)] = { config };
       renderCanvas();
       return;
     }
   }
-
   if (activeLocation === 'repo') {
-    const under = document.elementFromPoint(clientX, clientY);
     const rowEl = under && under.closest ? under.closest('.gh-file-row') : null;
     if (rowEl) {
       repoRowAnnotations[rowEl.dataset.file] = { config };
+      renderCanvas();
+      return;
+    }
+  }
+  if (activeLocation === 'folder') {
+    const rowEl = under && under.closest ? under.closest('.gh-table-row') : null;
+    if (rowEl) {
+      folderRowAnnotations[rowEl.dataset.file] = { config };
       renderCanvas();
       return;
     }
@@ -845,6 +918,15 @@ function enableReposition(el, chip) {
 }
 
 // ---------- canvases ----------
+function ghSubnavHTML() {
+  return `<div class="gh-subnav">${['Code','Issues','Pull requests','Agents','Actions','Projects','Wiki','Security and quality','Insights','Settings']
+    .map((t, i) => `<span class="${i === 0 ? 'active' : ''}">${t}</span>`).join('')}</div>`;
+}
+function ghCrumbPathHTML(crumbs, currentFile) {
+  const parts = crumbs.map(c => `<a>${escapeHTML(c)}</a> /`).join(' ');
+  return currentFile ? `${parts} <b>${escapeHTML(currentFile)}</b>` : parts;
+}
+
 function mockRepoHTML() {
   sortRepoFiles();
   const fileRows = repoFiles.map(f => `
@@ -864,10 +946,7 @@ function mockRepoHTML() {
       <div class="gh-search">Type <kbd>/</kbd> to search</div>
       <div class="gh-navicons"><span>🔔</span><span>➕</span><span class="gh-avatar"></span></div>
     </div>
-    <div class="gh-subnav">
-      ${['Code','Issues','Pull requests','Agents','Actions','Projects','Wiki','Security and quality','Insights','Settings']
-        .map((t, i) => `<span class="${i === 0 ? 'active' : ''}">${t}</span>`).join('')}
-    </div>
+    ${ghSubnavHTML()}
     <div class="gh-titlebar">
       <span class="gh-repo-icon">📕</span>
       <span class="gh-title">${escapeHTML(REPO_META.name)}</span>
@@ -915,9 +994,14 @@ function mockRepoHTML() {
         <hr/>
         <h4>Releases</h4>
         <p class="gh-muted">No releases published</p>
+        <a href="#">Create a new release</a>
         <hr/>
         <h4>Packages</h4>
         <p class="gh-muted">No packages published</p>
+        <a href="#">Publish your first package</a>
+        <hr/>
+        <h4>Contributors <span class="gh-count-badge">${REPO_META.contributors.length}</span></h4>
+        ${REPO_META.contributors.map(c => `<div class="gh-contributor-row"><span class="gh-avatar sm"></span>${escapeHTML(c)}</div>`).join('')}
         <hr/>
         <h4>Languages</h4>
         <div class="gh-langbar"><span style="width:100%;background:#A97BFF"></span></div>
@@ -934,29 +1018,74 @@ function mockRepoHTML() {
   </div>`;
 }
 function mockFolderHTML() {
-  return `
-    <div class="mock-folder-sidebar">
-      <div class="tree-item">📁 project-root</div>
-      <div class="tree-item indent">📁 src</div>
-      <div class="tree-item indent2">📄 app.js</div>
-      <div class="tree-item indent2">📄 utils.js</div>
-      <div class="tree-item indent">📁 tests</div>
-      <div class="tree-item indent">📄 package.json</div>
-      <div class="tree-item indent">📄 README.md</div>
-    </div>
-    <div class="mock-folder-main">
-      <h4>project-root</h4>
-      <p class="muted">Project overview / dashboard placeholder.</p>
-    </div>`;
-}
-function mockFileHTML() {
-  const lines = FILE_LINES.map((code, i) => `
-    <div class="code-line" data-line="${i}">
-      <span class="ln">${i + 1}</span><span class="code">${escapeHTML(code)}</span>
+  const rows = folderEntries.map(f => `
+    <div class="gh-table-row" data-file="${escapeHTML(f.name)}">
+      <span class="gh-table-name"><span class="gh-file-icon">${f.dir ? '📁' : fileIcon(f.name)}</span><span class="gh-name-text">${escapeHTML(f.name)}</span></span>
+      <span class="gh-table-msg">${f.parent ? '' : escapeHTML(f.msg)}</span>
+      <span class="gh-table-time">${f.parent ? '' : escapeHTML(f.time)}</span>
     </div>`).join('');
+
   return `
-    <div class="mock-file-tab">📄 app.js</div>
-    <div class="mock-code">${lines}</div>`;
+  <div class="gh-repo">
+    ${ghSubnavHTML()}
+    <div class="gh-crumbrow">
+      <span class="gh-sidebtn">▤</span>
+      <span class="gh-branch-btn">⑂ ${escapeHTML(FOLDER_META.branch)} ▾</span>
+      <span class="gh-crumb-path">${ghCrumbPathHTML(FOLDER_META.crumbs)}</span>
+      <span class="gh-copyicon">⧉</span>
+      <span class="gh-spacer"></span>
+      <span class="gh-gotofile">🔍 Go to file</span>
+      <span class="gh-btn">Add file ▾</span>
+      <span class="gh-btn">⋯</span>
+    </div>
+    <div class="gh-commitrow2">
+      <span class="gh-avatar sm"></span>
+      <b>${escapeHTML(FOLDER_META.committer)}</b>&nbsp;${escapeHTML(FOLDER_META.commitMsg)}
+      <span class="gh-spacer"></span>
+      <span class="gh-muted">${escapeHTML(FOLDER_META.hash)} · ${escapeHTML(FOLDER_META.time)}</span>
+      <span class="gh-commits-link">🕐 History</span>
+    </div>
+    <div class="gh-table">
+      <div class="gh-table-head"><span>Name</span><span>Last commit message</span><span>Last commit date</span></div>
+      <div id="ghFolderRows">${rows}</div>
+    </div>
+  </div>`;
+}
+
+function mockFileHTML() {
+  const lines = FILE_CODE.map((line, i) => `
+    <div class="code-line" data-line="${i}">
+      <span class="ln">${i + 1}</span><span class="code">${renderCodeLine(line)}</span>
+    </div>`).join('');
+
+  return `
+  <div class="gh-repo">
+    ${ghSubnavHTML()}
+    <div class="gh-crumbrow">
+      <span class="gh-sidebtn">▤</span>
+      <span class="gh-branch-btn">⑂ ${escapeHTML(FILE_META.branch)} ▾</span>
+      <span class="gh-crumb-path">${ghCrumbPathHTML(FILE_META.crumbs, FILE_META.fileName)}</span>
+      <span class="gh-copyicon">⧉</span>
+    </div>
+    <div class="gh-commitrow2">
+      <span class="gh-avatar sm"></span>
+      <b>${escapeHTML(FILE_META.committer)}</b>&nbsp;${escapeHTML(FILE_META.commitMsg)}
+      <span class="gh-spacer"></span>
+      <span class="gh-muted">${escapeHTML(FILE_META.hash)} · ${escapeHTML(FILE_META.time)}</span>
+      <span class="gh-commits-link">🕐 History</span>
+    </div>
+    <div class="gh-codepanel">
+      <div class="gh-codetoolbar">
+        <span class="gh-codetab active">Code</span><span class="gh-codetab">Blame</span>
+        <span class="gh-codestats">${FILE_META.lines} lines (${FILE_META.loc} loc) · ${FILE_META.size}</span>
+        <span class="gh-spacer"></span>
+        <span class="gh-toolicon">Raw</span><span class="gh-toolicon">⧉</span><span class="gh-toolicon">⬇</span><span class="gh-toolicon">✎</span>
+        <span class="gh-btn gh-code-btn">&lt;&gt;</span>
+      </div>
+      <div class="mock-code">${lines}</div>
+      <div class="gh-code-more">⋯ ${FILE_META.lines - FILE_CODE.length} more lines not shown in this mock</div>
+    </div>
+  </div>`;
 }
 function escapeHTML(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -991,25 +1120,9 @@ function renderCanvas() {
     Object.entries(fileLineAnnotations).forEach(([idx, ann]) => {
       const lineEl = mock.querySelector(`.code-line[data-line="${idx}"]`);
       if (!lineEl) return;
-      const typo = ann.config.visual.find(v => v.style === 'typography');
-      const variant = typo ? variantOf('typography', typo.variant) : null;
       const codeSpan = lineEl.querySelector('.code');
-      if (variant && variant.id === 'color') { codeSpan.style.color = '#7c3aed'; codeSpan.style.fontWeight = '600'; }
-      else if (variant && variant.id === 'font') { codeSpan.style.fontStyle = 'italic'; codeSpan.style.color = '#7c3aed'; }
-      else if (variant && variant.id === 'highlight') { codeSpan.style.background = '#ede9fe'; codeSpan.style.borderRadius = '4px'; codeSpan.style.padding = '1px 4px'; }
-
-      const label = ann.config.text[0] ? labelById[ann.config.text[0]].text : 'AI';
-      const tag = document.createElement('span');
-      tag.className = 'line-tag';
-      tag.style.background = '#ede9fe';
-      tag.style.color = '#7c3aed';
-      tag.innerHTML = `${label} <span data-remove-line="${idx}" style="cursor:pointer;margin-left:4px;">✕</span>`;
-      lineEl.appendChild(tag);
-      tag.querySelector('[data-remove-line]').addEventListener('click', (e) => {
-        e.stopPropagation();
-        delete fileLineAnnotations[idx];
-        renderCanvas();
-      });
+      const tagEl = buildRowAnnotationEl(codeSpan, ann.config, () => { delete fileLineAnnotations[idx]; renderCanvas(); });
+      lineEl.appendChild(tagEl);
     });
   }
 
@@ -1017,19 +1130,50 @@ function renderCanvas() {
     Object.entries(repoRowAnnotations).forEach(([fileName, ann]) => {
       const rowEl = mock.querySelector(`.gh-file-row[data-file="${cssEscape(fileName)}"]`);
       if (!rowEl) return;
-      const badge = document.createElement('span');
-      badge.className = 'gh-row-chip';
-      badge.innerHTML = chipInnerHTML(ann.config) + `<span data-remove-row="${escapeHTML(fileName)}" style="cursor:pointer;margin-left:4px;opacity:.6;">✕</span>`;
+      const nameEl = rowEl.querySelector('.gh-file-name');
+      const tagEl = buildRowAnnotationEl(nameEl, ann.config, () => { delete repoRowAnnotations[fileName]; renderCanvas(); });
       const delBtn = rowEl.querySelector('.gh-file-del');
-      if (delBtn) rowEl.insertBefore(badge, delBtn); else rowEl.appendChild(badge);
-      badge.querySelector('[data-remove-row]').addEventListener('click', (e) => {
-        e.stopPropagation();
-        delete repoRowAnnotations[fileName];
-        renderCanvas();
-      });
+      if (delBtn) rowEl.insertBefore(tagEl, delBtn); else rowEl.appendChild(tagEl);
     });
     wireRepoControls(mock);
   }
+
+  if (activeLocation === 'folder') {
+    Object.entries(folderRowAnnotations).forEach(([fileName, ann]) => {
+      const rowEl = mock.querySelector(`.gh-table-row[data-file="${cssEscape(fileName)}"]`);
+      if (!rowEl) return;
+      const nameEl = rowEl.querySelector('.gh-name-text');
+      const tagEl = buildRowAnnotationEl(nameEl, ann.config, () => { delete folderRowAnnotations[fileName]; renderCanvas(); });
+      rowEl.querySelector('.gh-table-name').appendChild(tagEl);
+    });
+  }
+}
+
+// A chip dropped onto real text (a filename, a code line) restyles that text directly
+// when it carries a Typography visual; anything else attaches as a small badge instead —
+// only "typography" is meant to feel like it's editing the text itself.
+function buildRowAnnotationEl(textEl, config, onRemove) {
+  const typo = config.visual.find(v => v.style === 'typography');
+  let el;
+  if (typo) {
+    const variant = variantOf('typography', typo.variant);
+    if (variant.id === 'color') textEl.classList.add('typo-color');
+    else if (variant.id === 'font') textEl.classList.add('typo-font');
+    else if (variant.id === 'highlight') textEl.classList.add('typo-highlight');
+    const label = config.text.length ? labelById[config.text[0]].text : 'Aa';
+    el = document.createElement('span');
+    el.className = 'row-typo-tag';
+    el.innerHTML = `${escapeHTML(label)} <span class="row-remove-x">✕</span>`;
+  } else {
+    el = document.createElement('span');
+    el.className = 'row-chip-badge';
+    el.innerHTML = chipInnerHTML(config) + `<span class="row-remove-x">✕</span>`;
+  }
+  el.querySelector('.row-remove-x').addEventListener('click', (e) => {
+    e.stopPropagation();
+    onRemove();
+  });
+  return el;
 }
 
 function cssEscape(s) {
@@ -1086,6 +1230,7 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   chipsByLocation[activeLocation] = [];
   if (activeLocation === 'file') fileLineAnnotations = {};
   if (activeLocation === 'repo') repoRowAnnotations = {};
+  if (activeLocation === 'folder') folderRowAnnotations = {};
   renderCanvas();
 });
 
