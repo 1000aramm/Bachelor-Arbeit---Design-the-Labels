@@ -10,7 +10,7 @@
   --ai-bg: #ccfbf1; --ai-border: #14b8a6; --ai-text: #0f766e;
   --human-bg: #dcfce7; --human-border: #22c55e; --human-text: #15803d;
   --neutral-bg: #f1f5f9; --neutral-border: #94a3b8; --neutral-text: #475569;
-  --visual-icon: #2563eb; --visual-typo: #7c3aed; --visual-pct: #059669;
+  --visual-icon: #2563eb; --visual-typo: #7c3aed; --visual-pct: #047857;
   --panel-bg: #ffffff; --app-bg: #f4f5f7; --border: #e2e8f0; --ink: #1e293b; --muted: #64748b;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
@@ -75,6 +75,21 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 }
 .variant-chip.selected { color: #fff; border-color: transparent; }
 
+/* Icon picker: grouped Human / Robot / Marks menus, glyph-only select targets */
+.variant-group { margin: 6px 0 2px 4px; }
+.variant-group h6 {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+  margin: 7px 0 4px; font-weight: 700;
+}
+.variant-icons { display: flex; flex-wrap: wrap; gap: 5px; }
+.variant-icon-chip {
+  width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); border-radius: 8px; background: #fff; cursor: pointer;
+}
+.variant-icon-chip .vi-emoji { font-size: 16px; line-height: 1; }
+.variant-icon-chip svg { width: 20px; height: 20px; display: block; }
+.variant-icon-chip.selected { border-color: var(--visual-icon); box-shadow: 0 0 0 2px #dbeafe; }
+
 .hint { font-size: 11px; color: #b45309; margin-top: 6px; min-height: 14px; }
 
 .tray-panel { padding: 10px 12px; }
@@ -107,16 +122,23 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .chip-text.human { background: var(--human-bg); color: var(--human-text); border-color: var(--human-border); }
 .chip-text.noai { background: var(--neutral-bg); color: var(--neutral-text); border-color: var(--neutral-border); }
 .chip-plus { opacity: .5; font-weight: 400; }
-.chip-icon-glyph {
-  display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px;
-  border-radius: 50%; background: #eff6ff; color: var(--visual-icon); font-size: 11px;
-}
+.chip-icon-emoji { font-size: 14px; line-height: 1; }
+/* Marks are boxed to the same optical size as an emoji glyph. */
+.chip-icon-mark { display: inline-flex; width: 17px; height: 17px; flex-shrink: 0; }
+.chip-icon-mark svg { width: 100%; height: 100%; display: block; }
 .chip-typo-sample { font-weight: 700; color: var(--visual-typo); }
 .chip-typo-sample.font { font-style: italic; font-family: Georgia, serif; }
 .chip-typo-sample.highlight { background: #ede9fe; padding: 1px 5px; border-radius: 4px; }
 .chip-pct { display:inline-flex; align-items:center; gap:5px; color: var(--visual-pct); cursor: pointer;}
-.chip-pct .bar-track { width: 42px; height: 6px; border-radius: 4px; background: #d1fae5; overflow: hidden; }
-.chip-pct .bar-fill { height: 100%; background: var(--visual-pct); }
+/* Track is grey and the fill is a deep green so the bar reads clearly at chip size.
+   The track must be a flex container: .bar-fill is a span, and as a plain inline box
+   its width/height would collapse to zero. */
+.chip-pct .bar-track {
+  display: flex; align-items: stretch;
+  width: 46px; height: 9px; border-radius: 5px; background: #cbd5e1;
+  border: 1px solid #94a3b8; overflow: hidden;
+}
+.chip-pct .bar-fill { display: block; height: 100%; background: #047857; }
 
 .placed-chip { position: absolute; touch-action: none; cursor: grab; z-index: 5; display: inline-flex; align-items: center; }
 .chip-remove {
@@ -408,20 +430,36 @@ const T_LABELS = [
   }
 ];
 
+// Inline SVG marks so index.html stays a single self-contained file.
+const MARK_SVG = {
+  logo: '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Claude logo mark"><rect width="64" height="64" rx="14" fill="#CD7B5A"/><g fill="#FAF2EA" stroke="#FAF2EA" stroke-width="1.6" stroke-linejoin="round"><path d="M34.6 31.5L27.5 6.4L29.4 32.5ZM34.2 32.7L39.1 10.1L29.8 31.3ZM33.7 33.7L47.9 16.1L30.3 30.3ZM32.8 34.2L54.1 24.0L31.2 29.8ZM32.0 34.6L57.5 32.0L32.0 29.4ZM31.2 34.1L52.7 39.5L32.8 29.9ZM30.2 33.5L46.5 49.2L33.8 30.5ZM29.4 32.2L34.3 57.9L34.6 31.8ZM30.1 30.9L21.0 51.1L33.9 33.1ZM32.9 29.7L8.0 23.3L31.1 34.3ZM33.6 30.4L16.1 16.1L30.4 33.6Z"/><circle cx="32" cy="32" r="4.6"/></g></svg>',
+  combined: '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Half human, half AI"><defs><linearGradient id="cfc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBBF24"/><stop offset="1" stop-color="#EE7B39"/></linearGradient><clipPath id="clh"><rect x="0" y="0" width="31.2" height="64"/></clipPath><clipPath id="crh"><rect x="32.8" y="0" width="31.2" height="64"/></clipPath></defs><g clip-path="url(#clh)"><circle cx="32" cy="35" r="27" fill="url(#cfc)"/><circle cx="20" cy="29" r="5.4" fill="#3A2A1F"/><path d="M13 45q10 9 20 3.5" stroke="#3A2A1F" stroke-width="3.4" fill="none" stroke-linecap="round"/></g><g clip-path="url(#crh)"><rect x="6" y="12" width="52" height="46" rx="13" fill="#EBEEF2"/><rect x="13" y="24" width="38" height="21" rx="9" fill="#2F3E52"/><circle cx="41" cy="34.5" r="4.2" fill="#EAEEF4"/><rect x="45.4" y="2" width="4.4" height="13" rx="2.2" fill="#F26FB0"/><circle cx="47.6" cy="2.6" r="4.2" fill="#EC4899"/></g><rect x="30.7" y="0" width="2.6" height="64" fill="#131A24"/></svg>',
+};
+
 const VISUAL_STYLES = [
-  { id: 'icon', text: 'Icon', color: '#2563eb', variants: [
-    { id: 'emoji', text: 'Emoji', glyph: '🙂' },
-    { id: 'logo', text: 'Logo mark', glyph: '◆' },
-    { id: 'sticker', text: 'Sticker', glyph: '⬤' },
-    { id: 'symbol', text: 'Distinct symbol', glyph: '△' },
-    { id: 'combined', text: 'Combined (half human / half AI)', glyph: '◐' },
+  // Icon variants are picked purely by their glyph/mark — no text labels in the picker.
+  { id: 'icon', text: 'Icon', color: '#2563eb', iconPicker: true, variants: [
+    { id: 'h-smile',   group: 'Human',  glyph: '\u{1F642}', text: 'Slightly smiling face' },
+    { id: 'h-grin',    group: 'Human',  glyph: '\u{1F600}', text: 'Grinning face' },
+    { id: 'h-person',  group: 'Human',  glyph: '\u{1F9D1}', text: 'Person' },
+    { id: 'h-bust',    group: 'Human',  glyph: '\u{1F464}', text: 'Bust in silhouette' },
+    { id: 'h-wave',    group: 'Human',  glyph: '\u{1F44B}', text: 'Waving hand' },
+    { id: 'h-write',   group: 'Human',  glyph: '\u{270D}\u{FE0F}', text: 'Writing hand' },
+    { id: 'r-robot',   group: 'Robot',  glyph: '\u{1F916}', text: 'Robot face' },
+    { id: 'r-arm',     group: 'Robot',  glyph: '\u{1F9BE}', text: 'Mechanical arm' },
+    { id: 'r-gear',    group: 'Robot',  glyph: '\u{2699}\u{FE0F}', text: 'Gear' },
+    { id: 'r-alien',   group: 'Robot',  glyph: '\u{1F47E}', text: 'Alien monster' },
+    { id: 'r-laptop',  group: 'Robot',  glyph: '\u{1F4BB}', text: 'Laptop' },
+    { id: 'r-brain',   group: 'Robot',  glyph: '\u{1F9E0}', text: 'Brain' },
+    { id: 'logo',      group: 'Marks',  mark: 'logo',     text: 'Claude logo mark' },
+    { id: 'combined',  group: 'Marks',  mark: 'combined', text: 'Half human / half AI' },
   ]},
   { id: 'typography', text: 'Typography', color: '#7c3aed', variants: [
     { id: 'color', text: 'Color' },
     { id: 'font', text: 'Font' },
     { id: 'highlight', text: 'Highlight style' },
   ]},
-  { id: 'percentage', text: 'Percentage / AI score', color: '#059669', variants: [
+  { id: 'percentage', text: 'Percentage / AI score', color: '#047857', variants: [
     { id: 'simple', text: 'Simple % badge' },
     { id: 'bar', text: 'Score bar' },
     { id: 'split', text: 'Contribution split (Human—AI)' },
@@ -576,7 +614,9 @@ function chipVisualPartHTML(v) {
   const style = styleById[v.style];
   const variant = variantOf(v.style, v.variant) || style.variants[0];
   if (v.style === 'icon') {
-    return `<span class="chip-icon-glyph" title="${variant.text}">${variant.glyph}</span>`;
+    return variant.mark
+      ? `<span class="chip-icon-mark" title="${variant.text}">${MARK_SVG[variant.mark]}</span>`
+      : `<span class="chip-icon-emoji" title="${variant.text}">${variant.glyph}</span>`;
   }
   if (v.style === 'typography') {
     const cls = variant.id === 'font' ? 'font' : (variant.id === 'highlight' ? 'highlight' : '');
@@ -678,13 +718,36 @@ function renderLabelsPanel() {
   });
 }
 
+// Icon variants are grouped into Human / Robot / Marks sub-menus and shown as
+// glyphs only — the name lives in the tooltip, never as selectable text.
+function iconPickerHTML(style, sel) {
+  const groups = [];
+  style.variants.forEach(v => {
+    let g = groups.find(x => x.label === v.group);
+    if (!g) groups.push(g = { label: v.group, items: [] });
+    g.items.push(v);
+  });
+  return groups.map(g => `
+    <div class="variant-group">
+      <h6>${g.label}</h6>
+      <div class="variant-icons">
+        ${g.items.map(v => `
+          <button class="variant-icon-chip ${sel.variant === v.id ? 'selected' : ''}"
+                  data-style="${style.id}" data-variant="${v.id}" title="${v.text}">
+            ${v.mark ? MARK_SVG[v.mark] : `<span class="vi-emoji">${v.glyph}</span>`}
+          </button>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
 // ---------- Visual panel ----------
 function renderVisualPanel() {
   const body = document.getElementById('visualBody');
   body.innerHTML = VISUAL_STYLES.map(style => {
     const sel = selectedVisual.find(v => v.style === style.id);
     let variantsHTML = '';
-    if (sel) {
+    if (sel && style.iconPicker) variantsHTML = iconPickerHTML(style, sel);
+    else if (sel) {
       variantsHTML = `<div class="variant-strip">` + style.variants.map(v => `
         <span class="variant-chip ${sel.variant === v.id ? 'selected' : ''}" data-style="${style.id}" data-variant="${v.id}"
           style="${sel.variant === v.id ? 'background:' + style.color + ';' : ''}">${v.text}</span>
@@ -712,7 +775,7 @@ function renderVisualPanel() {
     });
   });
 
-  body.querySelectorAll('.variant-chip').forEach(chip => {
+  body.querySelectorAll('.variant-chip, .variant-icon-chip').forEach(chip => {
     chip.addEventListener('click', (e) => {
       e.stopPropagation();
       const styleId = chip.dataset.style;
