@@ -125,21 +125,77 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 }
 .ghost-chip { position: fixed; pointer-events: none; z-index: 999; opacity: .9; transform: translate(-50%, -50%); }
 
-/* --- repo mock --- */
-.mock-repo-header { padding: 12px 16px; border-bottom: 1px solid var(--border); }
-.mock-breadcrumb { font-size: 14px; color: var(--muted); }
-.mock-breadcrumb b { color: var(--ink); }
-.mock-tabs { margin-top: 8px; display: flex; gap: 16px; font-size: 12px; color: var(--muted); }
-.mock-badgerow { min-height: 34px; padding: 6px 16px; border-bottom: 1px dashed var(--border); display: flex; gap: 6px; align-items: center; flex-wrap: wrap;}
-.mock-badgerow::before { content: 'badge row'; font-size: 10px; color: #cbd5e1; position: absolute; margin-top: -2px; }
-.mock-repo-body { display: flex; gap: 0; }
-.mock-filelist { flex: 1; padding: 10px 16px; border-right: 1px solid var(--border); }
-.mock-file-row { font-size: 12.5px; padding: 7px 4px; color: var(--ink); border-bottom: 1px solid #f1f5f9; }
-.mock-sidebar { width: 220px; padding: 12px 16px; }
-.mock-sidebar h4 { font-size: 13px; margin: 0 0 6px; }
-.mock-sidebar .muted { font-size: 11.5px; color: var(--muted); }
-.mock-topics { margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap; }
-.mock-topics span { font-size: 10.5px; background: #eff6ff; color: #1d4ed8; padding: 2px 8px; border-radius: 999px; }
+/* --- repo mock (GitHub look-alike, dark) --- */
+.mock-repo { overflow: visible; min-height: 0; }
+.gh-repo { background: #0d1117; color: #c9d1d9; font-size: 13px; border-radius: 10px; overflow: hidden; }
+.gh-globalnav { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: #010409; border-bottom: 1px solid #30363d; }
+.gh-octicon { font-size: 20px; }
+.gh-crumb { font-size: 15px; }
+.gh-crumb b { font-weight: 600; }
+.gh-chev { color: #8b949e; font-size: 10px; }
+.gh-search { flex: 1; max-width: 380px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 6px 10px; color: #8b949e; font-size: 12px; }
+.gh-navicons { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gh-avatar { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg,#f97316,#7c3aed); display: inline-block; }
+.gh-avatar.sm { width: 16px; height: 16px; }
+
+.gh-subnav { display: flex; gap: 18px; padding: 0 16px; border-bottom: 1px solid #30363d; font-size: 13px; color: #8b949e; overflow-x: auto; }
+.gh-subnav span { padding: 10px 2px; cursor: default; white-space: nowrap; }
+.gh-subnav span.active { color: #c9d1d9; border-bottom: 2px solid #f78166; font-weight: 600; }
+
+.gh-titlebar { display: flex; align-items: center; gap: 8px; padding: 14px 16px 8px; flex-wrap: wrap; position: relative; }
+.gh-title { font-size: 20px; font-weight: 600; color: #58a6ff; }
+.gh-visibility { font-size: 11px; border: 1px solid #30363d; border-radius: 999px; padding: 1px 8px; color: #8b949e; }
+.gh-title-spacer { flex: 1; }
+.gh-titlebar .gh-btn { font-size: 12px; border: 1px solid #30363d; border-radius: 6px; padding: 4px 10px; background: #21262d; color: #c9d1d9; cursor: default; }
+.gh-titlebar .gh-btn b { font-weight: 600; }
+
+.gh-controls { display: flex; align-items: center; gap: 8px; padding: 8px 16px; flex-wrap: wrap; }
+.gh-branch-btn, .gh-ctrl-muted, .gh-gotofile { font-size: 12px; border: 1px solid #30363d; border-radius: 6px; padding: 5px 10px; background: #21262d; color: #c9d1d9; }
+.gh-ctrl-muted { background: transparent; color: #8b949e; border-color: transparent; }
+.gh-gotofile { color: #8b949e; }
+.gh-spacer { flex: 1; }
+.gh-controls .gh-addfile { cursor: pointer; }
+.gh-controls .gh-code-btn { background: #238636; border-color: #238636; color: #fff; font-weight: 600; }
+
+.gh-addfile-composer { display: flex; align-items: center; gap: 6px; padding: 0 16px 10px; flex-wrap: wrap; }
+.gh-addfile-composer input { flex: 1; max-width: 240px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 5px 8px; color: #c9d1d9; font-size: 12px; }
+.gh-addfile-composer input.err { border-color: #f85149; }
+.gh-addfile-composer button { font-size: 12px; border: 1px solid #30363d; border-radius: 6px; padding: 5px 10px; background: #21262d; color: #c9d1d9; cursor: pointer; }
+#ghNewFileConfirm { background: #238636; border-color: #238636; color: #fff; }
+.gh-addfile-err { font-size: 11px; color: #f85149; width: 100%; }
+
+.gh-commitrow { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid #30363d; border-radius: 6px 6px 0 0; margin: 0 16px; background: #161b22; font-size: 12.5px; }
+.gh-commitrow .gh-muted { color: #8b949e; }
+.gh-commits-link { color: #58a6ff; font-size: 12px; }
+
+.gh-body { display: flex; margin: 0 16px; border: 1px solid #30363d; border-top: none; }
+.gh-filelist { flex: 1; min-width: 0; }
+.gh-file-row { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid #21262d; font-size: 12.5px; position: relative; }
+.gh-file-row:last-child { border-bottom: none; }
+.gh-file-row:hover { background: #161b22; }
+.gh-file-icon { width: 16px; text-align: center; flex-shrink: 0; }
+.gh-file-name { color: #58a6ff; flex-shrink: 0; }
+.gh-file-msg { color: #8b949e; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 12px; }
+.gh-file-time { color: #8b949e; flex-shrink: 0; }
+.gh-new-tag { font-size: 9.5px; background: #238636; color: #fff; border-radius: 999px; padding: 1px 6px; margin-left: 6px; }
+.gh-file-del { display: none; margin-left: 4px; flex-shrink: 0; }
+.gh-file-row:hover .gh-file-del { display: inline-flex; }
+.gh-row-chip { margin-left: 6px; flex-shrink: 0; }
+
+.gh-sidebar { width: 260px; flex-shrink: 0; padding: 14px 16px; border-left: 1px solid #30363d; }
+.gh-sidebar h4 { font-size: 14px; margin: 10px 0 6px; display: flex; align-items: center; gap: 6px; }
+.gh-sidebar h4:first-child { margin-top: 0; }
+.gh-sidebar .gh-muted { color: #8b949e; font-size: 12.5px; }
+.gh-sidelinks div { font-size: 12.5px; padding: 4px 0; color: #c9d1d9; }
+.gh-sidebar hr { border: none; border-top: 1px solid #30363d; margin: 12px 0; }
+.gh-langbar { height: 8px; border-radius: 4px; overflow: hidden; display: flex; background: #21262d; }
+.gh-langlegend { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 6px; color: #c9d1d9; }
+.gh-langlegend .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.gh-readme { margin: 16px; border: 1px solid #30363d; border-radius: 6px; overflow: hidden; }
+.gh-readme-tab { padding: 10px 14px; border-bottom: 1px solid #30363d; font-size: 13px; }
+.gh-readme-body { padding: 16px 20px; }
+.gh-readme-body h2 { margin: 0 0 10px; font-size: 22px; border-bottom: 1px solid #30363d; padding-bottom: 8px; }
 
 /* --- folder mock --- */
 .mock-folder { display: flex; }
@@ -171,7 +227,7 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
   </div>
   <div class="loc-tabs" id="locTabs"></div>
 </header>
-<div class="banner">Location mockups are placeholders based on typical file / folder / GitHub layouts — share your Figma "location" frames and I'll match them exactly.</div>
+<div class="banner">Repository canvas is modelled on a real GitHub repo page (dark theme, file list, About/Releases/Packages/Languages). Folder and File canvases are still simplified placeholders.</div>
 
 <div class="layout">
   <div class="sidebar">
@@ -385,7 +441,50 @@ let selectedVisual = []; // up to 2 {style, variant}
 let activeLocation = 'repo';
 let chipsByLocation = { repo: [], folder: [], file: [] };
 let fileLineAnnotations = {}; // lineIndex -> {config}
+let repoRowAnnotations = {};  // fileName -> {config}
 let chipSeq = 1;
+
+// ---------- repo mock data (modelled on a real repo screenshot) ----------
+const REPO_META = {
+  owner: '1000aramm', name: 'Sopra', visibility: 'Public',
+  description: 'Software development',
+  branch: 'main', branches: 1, tags: 0,
+  stars: 0, watching: 0, forks: 0,
+  lastCommitMsg: 'Delete Faraway', lastCommitHash: '2d081fc', lastCommitTime: '5 months ago', commits: 3,
+  language: 'Kotlin',
+  readmeTitle: 'SoPra Projekt 2', readmeSub: 'Wichtige Links',
+};
+let repoFiles = [
+  { name: 'gradle/wrapper', dir: true, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'src', dir: true, msg: 'Initial commit', time: '5 months ago' },
+  { name: '.gitignore', dir: false, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'HowToPlay.pdf', dir: false, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'README.md', dir: false, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'build.gradle.kts', dir: false, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'detektConfig.yml', dir: false, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'gradle.properties', dir: false, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'gradlew', dir: false, msg: 'Initial commit', time: '5 months ago' },
+  { name: 'test.txt', dir: false, msg: 'Initial commit', time: '5 months ago' },
+];
+// GitHub sorts tree entries this way: directories before files, each group in raw
+// byte order (so uppercase-leading names sort before lowercase ones) — this is what
+// actually places a new "agent.md" *between* existing files rather than at the end.
+function sortRepoFiles() {
+  repoFiles.sort((a, b) => {
+    if (a.dir !== b.dir) return a.dir ? -1 : 1;
+    return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+  });
+}
+function fileIcon(name) {
+  const n = name.toLowerCase();
+  if (n.startsWith('agent')) return '🤖';
+  if (n.endsWith('.md')) return '📘';
+  if (n.endsWith('.pdf')) return '📕';
+  if (n.endsWith('.yml') || n.endsWith('.yaml')) return '🛠️';
+  if (n.endsWith('.json') || n.endsWith('.properties')) return '🧩';
+  return '📄';
+}
+let addFileComposerOpen = false;
 
 // ---------- validation of current build selection ----------
 function currentComboState() {
@@ -700,6 +799,16 @@ function dropChip(config, clientX, clientY) {
     }
   }
 
+  if (activeLocation === 'repo') {
+    const under = document.elementFromPoint(clientX, clientY);
+    const rowEl = under && under.closest ? under.closest('.gh-file-row') : null;
+    if (rowEl) {
+      repoRowAnnotations[rowEl.dataset.file] = { config };
+      renderCanvas();
+      return;
+    }
+  }
+
   const x = Math.max(4, Math.min(rect.width - 160, clientX - rect.left - 20));
   const y = Math.max(4, Math.min(rect.height - 40, clientY - rect.top - 14));
   const chip = { id: 'c' + (chipSeq++), config, x, y };
@@ -737,26 +846,92 @@ function enableReposition(el, chip) {
 
 // ---------- canvases ----------
 function mockRepoHTML() {
+  sortRepoFiles();
+  const fileRows = repoFiles.map(f => `
+    <div class="gh-file-row" data-file="${escapeHTML(f.name)}">
+      <span class="gh-file-icon">${f.dir ? '📁' : fileIcon(f.name)}</span>
+      <span class="gh-file-name">${escapeHTML(f.name)}${f.custom ? '<span class="gh-new-tag">new</span>' : ''}</span>
+      <span class="gh-file-msg">${escapeHTML(f.msg)}</span>
+      <span class="gh-file-time">${escapeHTML(f.time)}</span>
+      ${f.custom ? `<button class="gh-file-del" data-del-file="${escapeHTML(f.name)}" title="Remove file">✕</button>` : ''}
+    </div>`).join('');
+
   return `
-    <div class="mock-repo-header">
-      <div class="mock-breadcrumb">📁 your-org / <b>your-repo</b></div>
-      <div class="mock-tabs"><span>Code</span><span>Issues</span><span>Pull requests</span><span>Actions</span></div>
+  <div class="gh-repo">
+    <div class="gh-globalnav">
+      <span class="gh-octicon">◐</span>
+      <span class="gh-crumb"><b>${escapeHTML(REPO_META.owner)}</b> / <b>${escapeHTML(REPO_META.name)}</b> <span class="gh-chev">▾</span></span>
+      <div class="gh-search">Type <kbd>/</kbd> to search</div>
+      <div class="gh-navicons"><span>🔔</span><span>➕</span><span class="gh-avatar"></span></div>
     </div>
-    <div class="mock-badgerow" style="padding-top:16px;"></div>
-    <div class="mock-repo-body">
-      <div class="mock-filelist">
-        <div class="mock-file-row">📄 README.md</div>
-        <div class="mock-file-row">📁 src/</div>
-        <div class="mock-file-row">📁 tests/</div>
-        <div class="mock-file-row">📄 package.json</div>
-        <div class="mock-file-row">📄 index.js</div>
+    <div class="gh-subnav">
+      ${['Code','Issues','Pull requests','Agents','Actions','Projects','Wiki','Security and quality','Insights','Settings']
+        .map((t, i) => `<span class="${i === 0 ? 'active' : ''}">${t}</span>`).join('')}
+    </div>
+    <div class="gh-titlebar">
+      <span class="gh-repo-icon">📕</span>
+      <span class="gh-title">${escapeHTML(REPO_META.name)}</span>
+      <span class="gh-visibility">${escapeHTML(REPO_META.visibility)}</span>
+      <span class="gh-title-spacer"></span>
+      <span class="gh-btn">📌 Pin</span>
+      <span class="gh-btn">👁 Watch&nbsp;<b>${REPO_META.watching}</b></span>
+      <span class="gh-btn">🍴 Fork&nbsp;<b>${REPO_META.forks}</b></span>
+      <span class="gh-btn">☆ Star&nbsp;<b>${REPO_META.stars}</b></span>
+    </div>
+    <div class="gh-controls">
+      <span class="gh-branch-btn">⑂ ${escapeHTML(REPO_META.branch)} ▾</span>
+      <span class="gh-ctrl-muted">⑂ ${REPO_META.branches} Branch</span>
+      <span class="gh-ctrl-muted">🏷 ${REPO_META.tags} Tags</span>
+      <span class="gh-gotofile">🔍 Go to file</span>
+      <span class="gh-spacer"></span>
+      <span class="gh-btn gh-addfile" id="ghAddFileBtn">Add file ▾</span>
+      <span class="gh-btn gh-code-btn">&lt;&gt; Code ▾</span>
+    </div>
+    <div class="gh-addfile-composer" id="ghAddFileComposer" style="display:${addFileComposerOpen ? 'flex' : 'none'};">
+      <input type="text" id="ghNewFileName" placeholder="e.g. agent.md" />
+      <button id="ghNewFileConfirm">Create file</button>
+      <button id="ghNewFileCancel">Cancel</button>
+      <div class="gh-addfile-err" id="ghAddFileErr"></div>
+    </div>
+    <div class="gh-commitrow">
+      <span class="gh-avatar sm"></span>
+      <b>${escapeHTML(REPO_META.owner)}</b>&nbsp;${escapeHTML(REPO_META.lastCommitMsg)}
+      <span class="gh-spacer"></span>
+      <span class="gh-muted">${escapeHTML(REPO_META.lastCommitHash)} · ${escapeHTML(REPO_META.lastCommitTime)}</span>
+      <span class="gh-commits-link">🕐 ${REPO_META.commits} Commits</span>
+    </div>
+    <div class="gh-body">
+      <div class="gh-filelist" id="ghFileList">${fileRows}</div>
+      <div class="gh-sidebar">
+        <h4>About <span class="gh-gear">⚙</span></h4>
+        <p class="gh-muted">${escapeHTML(REPO_META.description)}</p>
+        <div class="gh-sidelinks">
+          <div>📖 Readme</div>
+          <div>📈 Activity</div>
+          <div>⭐ ${REPO_META.stars} stars</div>
+          <div>👁 ${REPO_META.watching} watching</div>
+          <div>🍴 ${REPO_META.forks} forks</div>
+        </div>
+        <hr/>
+        <h4>Releases</h4>
+        <p class="gh-muted">No releases published</p>
+        <hr/>
+        <h4>Packages</h4>
+        <p class="gh-muted">No packages published</p>
+        <hr/>
+        <h4>Languages</h4>
+        <div class="gh-langbar"><span style="width:100%;background:#A97BFF"></span></div>
+        <div class="gh-langlegend"><span class="dot" style="background:#A97BFF"></span>${escapeHTML(REPO_META.language)} 100%</div>
       </div>
-      <div class="mock-sidebar">
-        <h4>About</h4>
-        <p class="muted">Short project description goes here.</p>
-        <div class="mock-topics"><span>topic-a</span><span>topic-b</span></div>
+    </div>
+    <div class="gh-readme">
+      <div class="gh-readme-tab">📖 README</div>
+      <div class="gh-readme-body">
+        <h2>${escapeHTML(REPO_META.readmeTitle)}</h2>
+        <p class="gh-muted">${escapeHTML(REPO_META.readmeSub)}</p>
       </div>
-    </div>`;
+    </div>
+  </div>`;
 }
 function mockFolderHTML() {
   return `
@@ -837,11 +1012,80 @@ function renderCanvas() {
       });
     });
   }
+
+  if (activeLocation === 'repo') {
+    Object.entries(repoRowAnnotations).forEach(([fileName, ann]) => {
+      const rowEl = mock.querySelector(`.gh-file-row[data-file="${cssEscape(fileName)}"]`);
+      if (!rowEl) return;
+      const badge = document.createElement('span');
+      badge.className = 'gh-row-chip';
+      badge.innerHTML = chipInnerHTML(ann.config) + `<span data-remove-row="${escapeHTML(fileName)}" style="cursor:pointer;margin-left:4px;opacity:.6;">✕</span>`;
+      const delBtn = rowEl.querySelector('.gh-file-del');
+      if (delBtn) rowEl.insertBefore(badge, delBtn); else rowEl.appendChild(badge);
+      badge.querySelector('[data-remove-row]').addEventListener('click', (e) => {
+        e.stopPropagation();
+        delete repoRowAnnotations[fileName];
+        renderCanvas();
+      });
+    });
+    wireRepoControls(mock);
+  }
+}
+
+function cssEscape(s) {
+  return window.CSS && CSS.escape ? CSS.escape(s) : s.replace(/["\\]/g, '\\$&');
+}
+
+// ---------- repo-mock controls: Add file, delete file ----------
+function wireRepoControls(mock) {
+  const addBtn = mock.querySelector('#ghAddFileBtn');
+  const composer = mock.querySelector('#ghAddFileComposer');
+  const input = mock.querySelector('#ghNewFileName');
+  const confirmBtn = mock.querySelector('#ghNewFileConfirm');
+  const cancelBtn = mock.querySelector('#ghNewFileCancel');
+  const errEl = mock.querySelector('#ghAddFileErr');
+
+  addBtn.addEventListener('click', () => {
+    addFileComposerOpen = !addFileComposerOpen;
+    composer.style.display = addFileComposerOpen ? 'flex' : 'none';
+    if (addFileComposerOpen) input.focus();
+  });
+  cancelBtn.addEventListener('click', () => {
+    addFileComposerOpen = false;
+    composer.style.display = 'none';
+    input.value = '';
+    errEl.textContent = '';
+  });
+
+  function createFile() {
+    const name = input.value.trim();
+    if (!name) { errEl.textContent = 'Enter a file name.'; input.classList.add('err'); return; }
+    if (repoFiles.some(f => f.name.toLowerCase() === name.toLowerCase())) {
+      errEl.textContent = 'A file with that name already exists.'; input.classList.add('err'); return;
+    }
+    repoFiles.push({ name, dir: false, custom: true, msg: `Add ${name}`, time: 'now' });
+    addFileComposerOpen = false;
+    renderCanvas();
+  }
+  confirmBtn.addEventListener('click', createFile);
+  input.addEventListener('input', () => { errEl.textContent = ''; input.classList.remove('err'); });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') createFile(); });
+
+  mock.querySelectorAll('[data-del-file]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const name = btn.dataset.delFile;
+      repoFiles = repoFiles.filter(f => f.name !== name);
+      delete repoRowAnnotations[name];
+      renderCanvas();
+    });
+  });
 }
 
 document.getElementById('clearBtn').addEventListener('click', () => {
   chipsByLocation[activeLocation] = [];
   if (activeLocation === 'file') fileLineAnnotations = {};
+  if (activeLocation === 'repo') repoRowAnnotations = {};
   renderCanvas();
 });
 
