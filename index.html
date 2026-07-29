@@ -118,7 +118,7 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .chip-pct .bar-track { width: 42px; height: 6px; border-radius: 4px; background: #d1fae5; overflow: hidden; }
 .chip-pct .bar-fill { height: 100%; background: var(--visual-pct); }
 
-.placed-chip { position: absolute; touch-action: none; }
+.placed-chip { position: absolute; touch-action: none; cursor: grab; z-index: 5; display: inline-flex; align-items: center; }
 .chip-remove {
   width: 15px; height: 15px; border-radius: 50%; background: #ef4444; color: #fff; border: none;
   font-size: 10px; line-height: 15px; text-align: center; cursor: pointer; margin-left: 2px; padding: 0;
@@ -178,8 +178,9 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .gh-file-row:last-child { border-bottom: none; }
 .gh-file-row:hover { background: #f6f8fa; }
 .gh-file-icon { width: 16px; text-align: center; flex-shrink: 0; }
-.gh-file-name { color: #0969da; flex-shrink: 0; }
-.gh-file-msg { color: #656d76; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 12px; }
+/* Fixed name column so every "Initial commit" message starts at the same x, as on GitHub. */
+.gh-file-name { color: #0969da; flex: 0 0 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gh-file-msg { color: #656d76; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gh-file-time { color: #656d76; flex-shrink: 0; }
 .gh-new-tag { font-size: 9.5px; background: #1f883d; color: #fff; border-radius: 999px; padding: 1px 6px; margin-left: 6px; }
 .gh-file-del { display: none; margin-left: 4px; flex-shrink: 0; border: none; background: none; color: #cf222e; cursor: pointer; }
@@ -236,10 +237,7 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .code-line .tok-kw { color: #cf222e; }
 .code-line .tok-cm { color: #6e7781; }
 
-/* --- shared row/line annotation (typography restyles the real text; other visual styles attach as a badge) --- */
-.row-typo-tag { margin-left: 8px; flex-shrink: 0; font-size: 10.5px; font-weight: 600; color: #7c3aed; background: #f3e8ff; border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
-.row-chip-badge { margin-left: 8px; flex-shrink: 0; }
-.row-remove-x { cursor: pointer; margin-left: 4px; opacity: .6; }
+/* Typography restyles the real text a chip was dropped on; the chip itself still floats freely. */
 .typo-color { color: #7c3aed !important; font-weight: 700; }
 .typo-font { font-style: italic; color: #7c3aed !important; }
 .typo-highlight { background: #ede9fe; border-radius: 4px; padding: 1px 5px; }
@@ -255,7 +253,7 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
   </div>
   <div class="loc-tabs" id="locTabs"></div>
 </header>
-<div class="banner">All three canvases are modelled on real GitHub screenshots (light theme). Drag a Typography chip onto a filename or code line to restyle that text directly — other chips attach as a small badge next to it.</div>
+<div class="banner">Chips drop wherever you release them and can be dragged around freely. Textual labels are limited to the vetted AI+human pairings; visual styles combine freely, with or without a label. A Typography chip dropped on a filename or code line also restyles that text.</div>
 
 <div class="layout">
   <div class="sidebar">
@@ -431,8 +429,6 @@ const VISUAL_STYLES = [
 ];
 
 const TT_PAIRS = [["human-led", "ai-assisted"], ["human-supervised", "ai-assisted"], ["human-developed", "ai-assisted"], ["human-led", "ai-generated"], ["human-supervised", "ai-generated"], ["human-assisted", "ai-generated"], ["human-reviewed", "ai-generated"], ["human-supported", "ai-generated"], ["cross-checked-by-human", "ai-generated"], ["with-without-human-intervention", "ai-generated"], ["human-optimized", "ai-generated"], ["human-assisted", "ai-led"], ["human-reviewed", "ai-led"], ["human-supported", "ai-led"], ["cross-checked-by-human", "ai-led"], ["with-without-human-intervention", "ai-led"], ["human-developed", "ai-led"], ["human-optimized", "ai-led"], ["human-led", "authored-by-ai"], ["human-supervised", "authored-by-ai"], ["human-assisted", "authored-by-ai"], ["human-reviewed", "authored-by-ai"], ["human-supported", "authored-by-ai"], ["cross-checked-by-human", "authored-by-ai"], ["with-without-human-intervention", "authored-by-ai"], ["human-optimized", "authored-by-ai"], ["human-ai-name", "authored-by-ai"], ["human-led", "vibe-coded"], ["human-supervised", "vibe-coded"], ["human-assisted", "vibe-coded"], ["human-reviewed", "vibe-coded"], ["human-supported", "vibe-coded"], ["cross-checked-by-human", "vibe-coded"], ["with-without-human-intervention", "vibe-coded"], ["human-optimized", "vibe-coded"], ["human-led", "ai-developed"], ["human-supervised", "ai-developed"], ["human-assisted", "ai-developed"], ["human-reviewed", "ai-developed"], ["human-supported", "ai-developed"], ["cross-checked-by-human", "ai-developed"], ["with-without-human-intervention", "ai-developed"], ["human-optimized", "ai-developed"], ["human-led", "ai-made-x"], ["human-supervised", "ai-made-x"], ["human-assisted", "ai-made-x"], ["human-reviewed", "ai-made-x"], ["human-supported", "ai-made-x"], ["cross-checked-by-human", "ai-made-x"], ["with-without-human-intervention", "ai-made-x"], ["human-developed", "ai-made-x"], ["human-optimized", "ai-made-x"], ["human-led", "brainstormed-with-ai"], ["human-supervised", "brainstormed-with-ai"], ["human-developed", "brainstormed-with-ai"], ["human-optimized", "brainstormed-with-ai"], ["human-led", "co-authored-by-ai"], ["human-supervised", "co-authored-by-ai"], ["human-led", "ai-used"], ["human-supervised", "ai-used"], ["human-assisted", "ai-used"], ["human-reviewed", "ai-used"], ["human-supported", "ai-used"], ["cross-checked-by-human", "ai-used"], ["with-without-human-intervention", "ai-used"], ["human-developed", "ai-used"], ["human-ai-name", "ai-used"], ["human-led", "partial-ai-use"], ["human-supervised", "partial-ai-use"], ["human-assisted", "partial-ai-use"], ["human-reviewed", "partial-ai-use"], ["human-supported", "partial-ai-use"], ["cross-checked-by-human", "partial-ai-use"], ["with-without-human-intervention", "partial-ai-use"], ["human-developed", "partial-ai-use"], ["human-ai-name", "partial-ai-use"], ["human-led", "complete-ai-use"], ["human-supervised", "complete-ai-use"], ["human-reviewed", "complete-ai-use"], ["human-supported", "complete-ai-use"], ["cross-checked-by-human", "complete-ai-use"], ["with-without-human-intervention", "complete-ai-use"], ["human-developed", "complete-ai-use"], ["human-ai-name", "complete-ai-use"], ["human-developed", "no-ai"]];
-const TV_PAIRS = [["ai-assisted", "icon"], ["ai-assisted", "typography"], ["ai-assisted", "percentage"], ["ai-generated", "icon"], ["ai-generated", "typography"], ["ai-generated", "percentage"], ["ai-led", "icon"], ["ai-led", "typography"], ["ai-led", "percentage"], ["authored-by-ai", "icon"], ["authored-by-ai", "typography"], ["authored-by-ai", "percentage"], ["vibe-coded", "icon"], ["vibe-coded", "typography"], ["vibe-coded", "percentage"], ["ai-developed", "icon"], ["ai-developed", "typography"], ["ai-developed", "percentage"], ["ai-made-x", "icon"], ["ai-made-x", "typography"], ["ai-made-x", "percentage"], ["brainstormed-with-ai", "icon"], ["brainstormed-with-ai", "typography"], ["brainstormed-with-ai", "percentage"], ["co-authored-by-ai", "icon"], ["co-authored-by-ai", "typography"], ["co-authored-by-ai", "percentage"], ["verified-by-ai", "icon"], ["verified-by-ai", "typography"], ["verified-by-ai", "percentage"], ["ai-used", "icon"], ["ai-used", "typography"], ["ai-used", "percentage"], ["partial-ai-use", "icon"], ["partial-ai-use", "typography"], ["partial-ai-use", "percentage"], ["complete-ai-use", "icon"], ["complete-ai-use", "typography"], ["complete-ai-use", "percentage"], ["no-ai", "percentage"], ["human-led", "icon"], ["human-led", "typography"], ["human-led", "percentage"], ["human-supervised", "icon"], ["human-supervised", "typography"], ["human-supervised", "percentage"], ["human-assisted", "icon"], ["human-assisted", "typography"], ["human-assisted", "percentage"], ["human-reviewed", "icon"], ["human-reviewed", "typography"], ["human-reviewed", "percentage"], ["human-supported", "icon"], ["human-supported", "typography"], ["human-supported", "percentage"], ["cross-checked-by-human", "icon"], ["cross-checked-by-human", "typography"], ["cross-checked-by-human", "percentage"], ["with-without-human-intervention", "icon"], ["with-without-human-intervention", "typography"], ["with-without-human-intervention", "percentage"], ["human-developed", "icon"], ["human-developed", "typography"], ["human-developed", "percentage"], ["human-optimized", "icon"], ["human-optimized", "typography"], ["human-optimized", "percentage"], ["human-ai-name", "icon"], ["human-ai-name", "typography"], ["human-ai-name", "percentage"]];
-const VV_PAIRS = [["icon", "typography"], ["icon", "percentage"], ["typography", "percentage"]];
 // ---------- lookups ----------
 const labelById = Object.fromEntries(T_LABELS.map(l => [l.id, l]));
 const styleById = Object.fromEntries(VISUAL_STYLES.map(s => [s.id, s]));
@@ -454,9 +450,6 @@ let selectedText = [];   // up to 2 label ids
 let selectedVisual = []; // up to 2 {style, variant}
 let activeLocation = 'repo';
 let chipsByLocation = { repo: [], folder: [], file: [] };
-let fileLineAnnotations = {};   // lineIndex -> {config}
-let repoRowAnnotations = {};    // fileName -> {config}
-let folderRowAnnotations = {};  // fileName -> {config}
 let chipSeq = 1;
 
 function fileIcon(name) {
@@ -554,28 +547,13 @@ function renderCodeLine(line) {
 }
 
 // ---------- validation of current build selection ----------
+// Only textual pairings are constrained (to the vetted AI+human list from the
+// spreadsheet). Visual styles are free extras: any number of them, in any
+// combination, with or without a textual label.
 function currentComboState() {
-  const nText = selectedText.length;
-  const nVisual = selectedVisual.length;
-  if (nText === 0 && nVisual === 0) return { valid: false, hint: '' };
-  if (nText >= 1 && nVisual >= 1 && !(nText === 1 && nVisual === 1)) {
-    return { valid: false, hint: "Triple combos aren't enabled yet — pick either two labels, two visual styles, or exactly one of each." };
-  }
-  if (nText === 2) {
-    const ok = pairIn(TT_PAIRS, selectedText[0], selectedText[1]);
-    if (!ok) return { valid: false, hint: 'That pairing is not in the vetted T+T list yet.' };
-  }
-  if (nVisual === 2) {
-    const ok = pairIn(VV_PAIRS, selectedVisual[0].style, selectedVisual[1].style);
-    if (!ok) return { valid: false, hint: 'That visual pairing is not in the vetted V+V list yet.' };
-  }
-  if (nText === 1 && nVisual === 1) {
-    const ok = pairIn(TV_PAIRS, selectedText[0], selectedVisual[0].style);
-    if (!ok) {
-      const label = labelById[selectedText[0]].text;
-      const okStyles = TV_PAIRS.filter(p => p[0] === selectedText[0]).map(p => styleById[p[1]].text);
-      return { valid: false, hint: `"${label}" only pairs with: ${okStyles.join(', ') || 'nothing yet'}.` };
-    }
+  if (selectedText.length === 0 && selectedVisual.length === 0) return { valid: false, hint: '' };
+  if (selectedText.length === 2 && !pairIn(TT_PAIRS, selectedText[0], selectedText[1])) {
+    return { valid: false, hint: 'That pairing is not in the vetted T+T list yet.' };
   }
   return { valid: true, hint: '' };
 }
@@ -703,15 +681,8 @@ function renderLabelsPanel() {
 // ---------- Visual panel ----------
 function renderVisualPanel() {
   const body = document.getElementById('visualBody');
-  function canPickStyle(styleId) {
-    if (selectedVisual.some(v => v.style === styleId)) return true;
-    if (selectedVisual.length >= 2) return false;
-    if (selectedVisual.length === 1) return pairIn(VV_PAIRS, selectedVisual[0].style, styleId);
-    return true;
-  }
   body.innerHTML = VISUAL_STYLES.map(style => {
     const sel = selectedVisual.find(v => v.style === style.id);
-    const enabled = canPickStyle(style.id);
     let variantsHTML = '';
     if (sel) {
       variantsHTML = `<div class="variant-strip">` + style.variants.map(v => `
@@ -721,7 +692,7 @@ function renderVisualPanel() {
     }
     return `
       <div class="visual-style-row">
-        <button class="visual-toggle ${sel ? 'selected' : ''}" data-style="${style.id}" ${enabled ? '' : 'disabled'}>
+        <button class="visual-toggle ${sel ? 'selected' : ''}" data-style="${style.id}">
           <span class="dot" style="background:${style.color}"></span>${style.text}
         </button>
         ${variantsHTML}
@@ -731,10 +702,9 @@ function renderVisualPanel() {
   body.querySelectorAll('.visual-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
       const styleId = btn.dataset.style;
-      const existing = selectedVisual.find(v => v.style === styleId);
-      if (existing) {
+      if (selectedVisual.some(v => v.style === styleId)) {
         selectedVisual = selectedVisual.filter(v => v.style !== styleId);
-      } else if (selectedVisual.length < 2) {
+      } else {
         selectedVisual.push({ style: styleId, variant: styleById[styleId].variants[0].id });
       }
       renderVisualPanel();
@@ -855,38 +825,34 @@ function dropChip(config, clientX, clientY) {
   const rect = mock.getBoundingClientRect();
   if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return;
 
-  const under = document.elementFromPoint(clientX, clientY);
-
-  if (activeLocation === 'file') {
-    const lineEl = under && under.closest ? under.closest('.code-line') : null;
-    if (lineEl) {
-      fileLineAnnotations[parseInt(lineEl.dataset.line, 10)] = { config };
-      renderCanvas();
-      return;
-    }
-  }
-  if (activeLocation === 'repo') {
-    const rowEl = under && under.closest ? under.closest('.gh-file-row') : null;
-    if (rowEl) {
-      repoRowAnnotations[rowEl.dataset.file] = { config };
-      renderCanvas();
-      return;
-    }
-  }
-  if (activeLocation === 'folder') {
-    const rowEl = under && under.closest ? under.closest('.gh-table-row') : null;
-    if (rowEl) {
-      folderRowAnnotations[rowEl.dataset.file] = { config };
-      renderCanvas();
-      return;
-    }
-  }
-
-  const x = Math.max(4, Math.min(rect.width - 160, clientX - rect.left - 20));
-  const y = Math.max(4, Math.min(rect.height - 40, clientY - rect.top - 14));
-  const chip = { id: 'c' + (chipSeq++), config, x, y };
+  // Chips always land free-floating, exactly where dropped — nothing snaps into a row.
+  // A Typography chip additionally remembers which piece of real text it was dropped on,
+  // so that text gets restyled while the chip itself stays draggable anywhere.
+  const chip = {
+    id: 'c' + (chipSeq++),
+    config,
+    x: clamp(clientX - rect.left - 20, 0, rect.width - 30),
+    y: clamp(clientY - rect.top - 14, 0, rect.height - 20),
+    typoTarget: config.visual.some(v => v.style === 'typography') ? typoTargetAt(clientX, clientY) : null,
+  };
   chipsByLocation[activeLocation].push(chip);
   renderCanvas();
+}
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// Returns a selector for the text element under the pointer, or null if the drop
+// didn't land on any labelable text.
+function typoTargetAt(clientX, clientY) {
+  const under = document.elementFromPoint(clientX, clientY);
+  if (!under || !under.closest) return null;
+  const line = under.closest('.code-line');
+  if (line) return `.code-line[data-line="${line.dataset.line}"] .code`;
+  const repoRow = under.closest('.gh-file-row');
+  if (repoRow) return `.gh-file-row[data-file="${cssEscape(repoRow.dataset.file)}"] .gh-file-name`;
+  const folderRow = under.closest('.gh-table-row');
+  if (folderRow) return `.gh-table-row[data-file="${cssEscape(folderRow.dataset.file)}"] .gh-name-text`;
+  return null;
 }
 
 function enableReposition(el, chip) {
@@ -902,8 +868,8 @@ function enableReposition(el, chip) {
         dragging = true;
       }
       ev.preventDefault();
-      const x = Math.max(0, Math.min(rect.width - 30, ev.clientX - rect.left - 20));
-      const y = Math.max(0, Math.min(rect.height - 20, ev.clientY - rect.top - 14));
+      const x = clamp(ev.clientX - rect.left - 20, 0, rect.width - 30);
+      const y = clamp(ev.clientY - rect.top - 14, 0, rect.height - 20);
       chip.x = x; chip.y = y;
       el.style.left = x + 'px';
       el.style.top = y + 'px';
@@ -1102,6 +1068,7 @@ function renderCanvas() {
   const mock = document.getElementById('mockActive');
 
   chipsByLocation[activeLocation].forEach(chip => {
+    applyTypoTarget(mock, chip);
     const el = document.createElement('div');
     el.className = 'placed-chip';
     el.style.left = chip.x + 'px';
@@ -1116,64 +1083,21 @@ function renderCanvas() {
     });
   });
 
-  if (activeLocation === 'file') {
-    Object.entries(fileLineAnnotations).forEach(([idx, ann]) => {
-      const lineEl = mock.querySelector(`.code-line[data-line="${idx}"]`);
-      if (!lineEl) return;
-      const codeSpan = lineEl.querySelector('.code');
-      const tagEl = buildRowAnnotationEl(codeSpan, ann.config, () => { delete fileLineAnnotations[idx]; renderCanvas(); });
-      lineEl.appendChild(tagEl);
-    });
-  }
-
-  if (activeLocation === 'repo') {
-    Object.entries(repoRowAnnotations).forEach(([fileName, ann]) => {
-      const rowEl = mock.querySelector(`.gh-file-row[data-file="${cssEscape(fileName)}"]`);
-      if (!rowEl) return;
-      const nameEl = rowEl.querySelector('.gh-file-name');
-      const tagEl = buildRowAnnotationEl(nameEl, ann.config, () => { delete repoRowAnnotations[fileName]; renderCanvas(); });
-      const delBtn = rowEl.querySelector('.gh-file-del');
-      if (delBtn) rowEl.insertBefore(tagEl, delBtn); else rowEl.appendChild(tagEl);
-    });
-    wireRepoControls(mock);
-  }
-
-  if (activeLocation === 'folder') {
-    Object.entries(folderRowAnnotations).forEach(([fileName, ann]) => {
-      const rowEl = mock.querySelector(`.gh-table-row[data-file="${cssEscape(fileName)}"]`);
-      if (!rowEl) return;
-      const nameEl = rowEl.querySelector('.gh-name-text');
-      const tagEl = buildRowAnnotationEl(nameEl, ann.config, () => { delete folderRowAnnotations[fileName]; renderCanvas(); });
-      rowEl.querySelector('.gh-table-name').appendChild(tagEl);
-    });
-  }
+  if (activeLocation === 'repo') wireRepoControls(mock);
 }
 
-// A chip dropped onto real text (a filename, a code line) restyles that text directly
-// when it carries a Typography visual; anything else attaches as a small badge instead —
-// only "typography" is meant to feel like it's editing the text itself.
-function buildRowAnnotationEl(textEl, config, onRemove) {
-  const typo = config.visual.find(v => v.style === 'typography');
-  let el;
-  if (typo) {
-    const variant = variantOf('typography', typo.variant);
-    if (variant.id === 'color') textEl.classList.add('typo-color');
-    else if (variant.id === 'font') textEl.classList.add('typo-font');
-    else if (variant.id === 'highlight') textEl.classList.add('typo-highlight');
-    const label = config.text.length ? labelById[config.text[0]].text : 'Aa';
-    el = document.createElement('span');
-    el.className = 'row-typo-tag';
-    el.innerHTML = `${escapeHTML(label)} <span class="row-remove-x">✕</span>`;
-  } else {
-    el = document.createElement('span');
-    el.className = 'row-chip-badge';
-    el.innerHTML = chipInnerHTML(config) + `<span class="row-remove-x">✕</span>`;
-  }
-  el.querySelector('.row-remove-x').addEventListener('click', (e) => {
-    e.stopPropagation();
-    onRemove();
-  });
-  return el;
+// Restyles the text a Typography chip was dropped on. Re-applied on every render
+// because the canvas HTML is rebuilt from scratch each time.
+function applyTypoTarget(mock, chip) {
+  if (!chip.typoTarget) return;
+  const textEl = mock.querySelector(chip.typoTarget);
+  if (!textEl) return;
+  const typo = chip.config.visual.find(v => v.style === 'typography');
+  if (!typo) return;
+  const variant = variantOf('typography', typo.variant);
+  if (variant.id === 'font') textEl.classList.add('typo-font');
+  else if (variant.id === 'highlight') textEl.classList.add('typo-highlight');
+  else textEl.classList.add('typo-color');
 }
 
 function cssEscape(s) {
@@ -1220,7 +1144,6 @@ function wireRepoControls(mock) {
       e.stopPropagation();
       const name = btn.dataset.delFile;
       repoFiles = repoFiles.filter(f => f.name !== name);
-      delete repoRowAnnotations[name];
       renderCanvas();
     });
   });
@@ -1228,9 +1151,6 @@ function wireRepoControls(mock) {
 
 document.getElementById('clearBtn').addEventListener('click', () => {
   chipsByLocation[activeLocation] = [];
-  if (activeLocation === 'file') fileLineAnnotations = {};
-  if (activeLocation === 'repo') repoRowAnnotations = {};
-  if (activeLocation === 'folder') folderRowAnnotations = {};
   renderCanvas();
 });
 
