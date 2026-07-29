@@ -259,10 +259,48 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .code-line .tok-kw { color: #cf222e; }
 .code-line .tok-cm { color: #6e7781; }
 
-/* Typography restyles the real text a chip was dropped on; the chip itself still floats freely. */
+/* Typography is painted onto real text as character ranges. */
 .typo-color { color: #7c3aed !important; font-weight: 700; }
 .typo-font { font-style: italic; color: #7c3aed !important; }
-.typo-highlight { background: #ede9fe; border-radius: 4px; padding: 1px 5px; }
+.typo-highlight { background: #ede9fe; border-radius: 4px; }
+[data-typo-run] { cursor: pointer; }
+
+/* Composer footers that live inside the Labels / Visual panels */
+.composer { border-top: 1px dashed var(--border); margin-top: 10px; padding-top: 9px; }
+.composer h6 {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+  margin: 0 0 5px; font-weight: 700;
+}
+.combo-caption { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.combo-caption b { color: var(--ink); }
+.composer-preview { min-height: 30px; display: flex; align-items: center; margin-bottom: 7px; }
+.ready-slot { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ready-slot:empty { display: none; }
+.ready-chip { position: relative; cursor: grab; }
+.ready-hint { font-size: 10.5px; color: var(--muted); margin-top: 5px; }
+
+/* Typography brush state */
+.brush-note {
+  font-size: 11px; background: #f5f3ff; border: 1px solid #ddd6fe; color: #5b21b6;
+  border-radius: 8px; padding: 7px 8px; margin-top: 8px; line-height: 1.35;
+}
+.brush-note button {
+  margin-top: 6px; font-size: 11px; border: 1px solid #c4b5fd; background: #fff; color: #5b21b6;
+  border-radius: 6px; padding: 3px 8px; cursor: pointer;
+}
+.mock.brush-on, .mock.brush-on [data-typo-key] { user-select: text; }
+.mock.brush-on [data-typo-key] { cursor: text; }
+.mock .placed-chip { user-select: none; }
+.mock.brush-on { outline: 2px dashed #c4b5fd; outline-offset: -2px; }
+
+/* Folder canvas needs room below the short listing so chips can be dropped there */
+.mock-folder, .mock-folder .gh-repo { min-height: 660px; }
+
+/* Full README rendering */
+.gh-readme-body h3 { font-size: 17px; margin: 18px 0 8px; border-bottom: 1px solid #d0d7de; padding-bottom: 7px; }
+.gh-readme-body ul { margin: 10px 0 0; padding-left: 22px; }
+.gh-readme-body li { margin: 7px 0; font-size: 13px; }
+.gh-readme-body a { color: #0969da; text-decoration: none; word-break: break-all; }
 
 </style>
 </head>
@@ -275,7 +313,7 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
   </div>
   <div class="loc-tabs" id="locTabs"></div>
 </header>
-<div class="banner">Chips drop wherever you release them and can be dragged around freely. Textual labels are limited to the vetted AI+human pairings; visual styles combine freely, with or without a label. A Typography chip dropped on a filename or code line also restyles that text.</div>
+<div class="banner">Textual labels: pick one or two, then <b>Create</b> and drag the chip onto the board. Visual styles: picking a variant makes a chip immediately. Typography is a brush &mdash; arm a variant, then drag across any text in the canvas to style exactly that range.</div>
 
 <div class="layout">
   <div class="sidebar">
@@ -290,13 +328,6 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
       <div class="panel-body" id="visualBody"></div>
     </div>
 
-    <div class="panel tray-panel">
-      <h5>Build a chip</h5>
-      <div class="build-preview" id="buildPreview"><span style="font-size:12px;color:var(--muted)">Pick label(s) and/or a visual style above</span></div>
-      <div class="hint" id="buildHint"></div>
-      <button class="add-btn" id="addBtn" disabled>Add to tray</button>
-      <div class="tray-list" id="trayList"></div>
-    </div>
 
   </div>
 
@@ -489,6 +520,9 @@ let selectedVisual = []; // up to 2 {style, variant}
 let activeLocation = 'repo';
 let chipsByLocation = { repo: [], folder: [], file: [] };
 let chipSeq = 1;
+let textChip = null;              // textual chip waiting to be dragged onto the board
+let typoBrush = null;             // armed typography variant id, or null
+let typoSegments = {};            // targetKey -> [{start, end, variant}] character ranges
 
 function fileIcon(name) {
   const n = name.toLowerCase();
@@ -511,6 +545,14 @@ const REPO_META = {
   language: 'Kotlin',
   readmeTitle: 'SoPra Projekt 2', readmeSub: 'Wichtige Links',
   contributors: ['1000aramm', 'happzday1'],
+  readmeLinks: [
+    ['Aktuelle Informationen zu diesem SoPra', 'https://sopra.cs.tu-dortmund.de/wiki/sopra/25D/start'],
+    ['Beispielprojekt Kartenspiel War', 'https://sopra-gitlab.cs.tu-dortmund.de/internal/bgw-war'],
+    ['Beispielprojekt Kartenspiel Net War', 'https://sopra-gitlab.cs.tu-dortmund.de/internal/bgw-net-war'],
+    ['Beispielprojekt Mau-Mau', 'https://sopra-gitlab.cs.tu-dortmund.de/internal/bgw-maumau'],
+    ['BoardGameWork (BGW) Network Guide', 'https://tudo-aqua.github.io/bgw/guides/network/communication'],
+    ['Weitere Links', 'https://sopra.cs.tu-dortmund.de/wiki/infos/links/'],
+  ],
 };
 let repoFiles = [
   { name: 'gradle/wrapper', dir: true, msg: 'Initial commit', time: '5 months ago' },
@@ -575,34 +617,6 @@ const FILE_CODE = [
   { code: '/**', kind: 'cm' },
   { code: ' * Scene that represents the end of a Faraway game.', kind: 'cm' },
 ];
-function renderCodeLine(line) {
-  if (line.kind === 'kw') {
-    const sp = line.code.indexOf(' ');
-    return `<span class="tok-kw">${escapeHTML(line.code.slice(0, sp))}</span>${escapeHTML(line.code.slice(sp))}`;
-  }
-  if (line.kind === 'cm') return `<span class="tok-cm">${escapeHTML(line.code)}</span>`;
-  return escapeHTML(line.code);
-}
-
-// ---------- validation of current build selection ----------
-// Only textual pairings are constrained (to the vetted AI+human list from the
-// spreadsheet). Visual styles are free extras: any number of them, in any
-// combination, with or without a textual label.
-function currentComboState() {
-  if (selectedText.length === 0 && selectedVisual.length === 0) return { valid: false, hint: '' };
-  if (selectedText.length === 2 && !pairIn(TT_PAIRS, selectedText[0], selectedText[1])) {
-    return { valid: false, hint: 'That pairing is not in the vetted T+T list yet.' };
-  }
-  return { valid: true, hint: '' };
-}
-
-function buildConfig() {
-  return {
-    text: selectedText.slice(),
-    visual: selectedVisual.map(v => ({ style: v.style, variant: v.variant })),
-  };
-}
-
 // ---------- chip rendering ----------
 function chipTextPartHTML(id) {
   const l = labelById[id];
@@ -672,12 +686,13 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ---------- Labels panel ----------
+// ---------- Labels panel (textual labels only, with its own Create button) ----------
 function renderLabelsPanel() {
   const body = document.getElementById('labelsBody');
-  const ai = T_LABELS.filter(l => l.part === 'ai');
-  const human = T_LABELS.filter(l => l.part === 'human');
+  // "No AI" is an AI-part label, so it sits at the bottom of the AI column.
   const noai = T_LABELS.find(l => l.part === null);
+  const ai = T_LABELS.filter(l => l.part === 'ai').concat(noai);
+  const human = T_LABELS.filter(l => l.part === 'human');
 
   function canPick(id) {
     if (selectedText.includes(id)) return true;
@@ -690,7 +705,8 @@ function renderLabelsPanel() {
     return `<div class="label-col"><h5>${title}</h5>` + list.map(l => {
       const sel = selectedText.includes(l.id);
       const enabled = canPick(l.id);
-      return `<button class="label-btn ${cls} ${sel ? 'selected' : ''}" data-id="${l.id}" ${enabled ? '' : 'disabled'}>${l.text}</button>`;
+      const c = l.part === null ? 'noai' : cls;
+      return `<button class="label-btn ${c} ${sel ? 'selected' : ''}" data-id="${l.id}" ${enabled ? '' : 'disabled'}>${l.text}</button>`;
     }).join('') + `</div>`;
   }
 
@@ -699,8 +715,14 @@ function renderLabelsPanel() {
       ${col(ai, 'ai', 'AI part')}
       ${col(human, 'human', 'Human part')}
     </div>
-    <div class="noai-row">
-      <button class="label-btn noai ${selectedText.includes(noai.id) ? 'selected' : ''}" data-id="${noai.id}" ${canPick(noai.id) ? '' : 'disabled'}>${noai.text}</button>
+    <div class="composer">
+      <h6>Label chip</h6>
+      <div class="combo-caption" id="labelCaption"></div>
+      <div class="composer-preview" id="labelPreview"></div>
+      <div class="hint" id="labelHint"></div>
+      <button class="add-btn" id="createLabelBtn" disabled>Create</button>
+      <div class="ready-slot" id="labelReady"></div>
+      <div class="ready-hint" id="labelReadyHint"></div>
     </div>
   `;
 
@@ -713,9 +735,68 @@ function renderLabelsPanel() {
         selectedText.push(id);
       }
       renderLabelsPanel();
-      updateBuildPreview();
     });
   });
+
+  document.getElementById('createLabelBtn').addEventListener('click', () => {
+    const state = labelComboState();
+    if (!state.valid) return;
+    textChip = { text: selectedText.slice(), visual: [] };
+    selectedText = [];
+    renderLabelsPanel();
+  });
+
+  updateLabelComposer();
+}
+
+// Only textual pairings are constrained, to the vetted AI+human list.
+function labelComboState() {
+  if (selectedText.length === 0) return { valid: false, hint: '' };
+  if (selectedText.length === 2 && !pairIn(TT_PAIRS, selectedText[0], selectedText[1])) {
+    return { valid: false, hint: 'That pairing is not in the vetted T+T list.' };
+  }
+  return { valid: true, hint: '' };
+}
+
+function updateLabelComposer() {
+  const caption = document.getElementById('labelCaption');
+  const preview = document.getElementById('labelPreview');
+  const hintEl = document.getElementById('labelHint');
+  const btn = document.getElementById('createLabelBtn');
+  const ready = document.getElementById('labelReady');
+  const readyHint = document.getElementById('labelReadyHint');
+  if (!caption) return;
+  const state = labelComboState();
+
+  if (selectedText.length === 0) {
+    caption.innerHTML = 'Pick one label, or two to combine.';
+    preview.innerHTML = '';
+  } else {
+    const names = selectedText.map(id => labelById[id].text);
+    caption.innerHTML = selectedText.length === 2
+      ? `Combined: <b>${escapeHTML(names[0])}</b> + <b>${escapeHTML(names[1])}</b>`
+      : `Single: <b>${escapeHTML(names[0])}</b>`;
+    preview.innerHTML = chipHTML({ text: selectedText, visual: [] });
+  }
+  hintEl.textContent = state.hint;
+  btn.disabled = !state.valid;
+
+  if (textChip) {
+    ready.innerHTML = `<span class="ready-chip" id="labelReadyChip">${chipHTML(textChip)}<button class="chip-remove" id="labelReadyDrop">✕</button></span>`;
+    readyHint.textContent = 'Drag it onto the board.';
+    document.getElementById('labelReadyChip').addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.chip-remove')) return;
+      startStampDrag(textChip, e);
+    });
+    document.getElementById('labelReadyDrop').addEventListener('click', (e) => {
+      e.stopPropagation();
+      textChip = null;
+      updateLabelComposer();
+    });
+  } else {
+    ready.innerHTML = '';
+    readyHint.textContent = '';
+  }
 }
 
 // Icon variants are grouped into Human / Robot / Marks sub-menus and shown as
@@ -762,16 +843,27 @@ function renderVisualPanel() {
       </div>`;
   }).join('');
 
+  body.insertAdjacentHTML('beforeend', `
+    <div class="composer">
+      <h6>Visual chip</h6>
+      <div class="ready-slot" id="visualReady"></div>
+      <div class="ready-hint" id="visualReadyHint"></div>
+      <div id="brushNote"></div>
+    </div>`);
+
   body.querySelectorAll('.visual-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
       const styleId = btn.dataset.style;
       if (selectedVisual.some(v => v.style === styleId)) {
         selectedVisual = selectedVisual.filter(v => v.style !== styleId);
+        if (styleId === 'typography') typoBrush = null;
       } else {
-        selectedVisual.push({ style: styleId, variant: styleById[styleId].variants[0].id });
+        const first = styleById[styleId].variants[0].id;
+        selectedVisual.push({ style: styleId, variant: first });
+        if (styleId === 'typography') typoBrush = first;
       }
       renderVisualPanel();
-      updateBuildPreview();
+      renderCanvas();
     });
   });
 
@@ -782,67 +874,59 @@ function renderVisualPanel() {
       const variantId = chip.dataset.variant;
       const entry = selectedVisual.find(v => v.style === styleId);
       if (entry) entry.variant = variantId;
+      if (styleId === 'typography') typoBrush = variantId;
       renderVisualPanel();
-      updateBuildPreview();
+      renderCanvas();
     });
   });
+
+  updateVisualComposer();
 }
 
-// ---------- build / tray ----------
-function updateBuildPreview() {
-  const preview = document.getElementById('buildPreview');
-  const hintEl = document.getElementById('buildHint');
-  const addBtn = document.getElementById('addBtn');
-  const state = currentComboState();
-  if (selectedText.length === 0 && selectedVisual.length === 0) {
-    preview.innerHTML = `<span style="font-size:12px;color:var(--muted)">Pick label(s) and/or a visual style above</span>`;
+// Icon and Percentage picks turn into a draggable chip the moment they are chosen —
+// no Create step, no history. Typography is not a chip ingredient: it arms a brush
+// that paints character ranges onto the real text in the canvas.
+function visualChipConfig() {
+  const parts = selectedVisual.filter(v => v.style !== 'typography');
+  return parts.length ? { text: [], visual: parts.map(v => ({ style: v.style, variant: v.variant })) } : null;
+}
+
+function updateVisualComposer() {
+  const ready = document.getElementById('visualReady');
+  const readyHint = document.getElementById('visualReadyHint');
+  const note = document.getElementById('brushNote');
+  if (!ready) return;
+
+  const cfg = visualChipConfig();
+  if (cfg) {
+    ready.innerHTML = `<span class="ready-chip" id="visualReadyChip">${chipHTML(cfg)}</span>`;
+    readyHint.textContent = 'Drag it onto the board.';
+    document.getElementById('visualReadyChip').addEventListener('pointerdown', (e) => {
+      startStampDrag(visualChipConfig(), e);
+    });
   } else {
-    preview.innerHTML = chipHTML(buildConfig());
+    ready.innerHTML = '';
+    readyHint.textContent = 'Pick an Icon or Percentage variant and the chip appears here.';
   }
-  hintEl.textContent = state.hint;
-  addBtn.disabled = !state.valid;
-}
 
-function renderTray() {
-  const trayList = document.getElementById('trayList');
-  trayList.innerHTML = window.__tray.map(item => `
-    <span class="tray-item" data-tray-id="${item.id}">
-      ${chipHTML(item.config)}
-      <button class="chip-remove" data-remove-tray="${item.id}" title="Remove from tray">✕</button>
-    </span>
-  `).join('');
-
-  trayList.querySelectorAll('[data-remove-tray]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = btn.dataset.removeTray;
-      window.__tray = window.__tray.filter(t => t.id !== id);
-      renderTray();
+  if (typoBrush) {
+    const v = variantOf('typography', typoBrush);
+    note.innerHTML = `<div class="brush-note">
+      <b>Typography brush: ${escapeHTML(v.text)}</b><br/>
+      Drag across any text in the canvas to style exactly that range — part of a line,
+      a whole line, or several lines. Click a styled run to remove it.
+      <button id="brushOff">Turn brush off</button>
+    </div>`;
+    document.getElementById('brushOff').addEventListener('click', () => {
+      typoBrush = null;
+      selectedVisual = selectedVisual.filter(x => x.style !== 'typography');
+      renderVisualPanel();
+      renderCanvas();
     });
-  });
-
-  trayList.querySelectorAll('.tray-item').forEach(el => {
-    el.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('.chip-remove')) return;
-      const id = el.dataset.trayId;
-      const item = window.__tray.find(t => t.id === id);
-      startStampDrag(item.config, e);
-    });
-  });
+  } else {
+    note.innerHTML = '';
+  }
 }
-window.__tray = [];
-
-document.getElementById('addBtn').addEventListener('click', () => {
-  const state = currentComboState();
-  if (!state.valid) return;
-  window.__tray.push({ id: 'tray-' + (chipSeq++), config: buildConfig() });
-  selectedText = [];
-  selectedVisual = [];
-  renderLabelsPanel();
-  renderVisualPanel();
-  updateBuildPreview();
-  renderTray();
-});
 
 // ---------- drag to place ----------
 // Chips whose whole surface is a percentage badge are also click-to-cycle targets,
@@ -889,34 +973,133 @@ function dropChip(config, clientX, clientY) {
   if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return;
 
   // Chips always land free-floating, exactly where dropped — nothing snaps into a row.
-  // A Typography chip additionally remembers which piece of real text it was dropped on,
-  // so that text gets restyled while the chip itself stays draggable anywhere.
-  const chip = {
+  chipsByLocation[activeLocation].push({
     id: 'c' + (chipSeq++),
     config,
     x: clamp(clientX - rect.left - 20, 0, rect.width - 30),
     y: clamp(clientY - rect.top - 14, 0, rect.height - 20),
-    typoTarget: config.visual.some(v => v.style === 'typography') ? typoTargetAt(clientX, clientY) : null,
-  };
-  chipsByLocation[activeLocation].push(chip);
+  });
   renderCanvas();
 }
 
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
-// Returns a selector for the text element under the pointer, or null if the drop
-// didn't land on any labelable text.
-function typoTargetAt(clientX, clientY) {
-  const under = document.elementFromPoint(clientX, clientY);
-  if (!under || !under.closest) return null;
-  const line = under.closest('.code-line');
-  if (line) return `.code-line[data-line="${line.dataset.line}"] .code`;
-  const repoRow = under.closest('.gh-file-row');
-  if (repoRow) return `.gh-file-row[data-file="${cssEscape(repoRow.dataset.file)}"] .gh-file-name`;
-  const folderRow = under.closest('.gh-table-row');
-  if (folderRow) return `.gh-table-row[data-file="${cssEscape(folderRow.dataset.file)}"] .gh-name-text`;
+// ---------- typography range brush ----------
+// Every piece of labelable text carries data-typo-key. Styling is stored as
+// character ranges against that key, so a range can cover part of a line, a whole
+// line, or run across many lines, and it survives the canvas being re-rendered.
+function renderTypoText(key, text, tokenClasses) {
+  const segs = typoSegments[key] || [];
+  if (!text.length) return '';
+  const per = new Array(text.length).fill(null);
+  segs.forEach(sg => {
+    for (let i = Math.max(0, sg.start); i < Math.min(text.length, sg.end); i++) per[i] = sg.variant;
+  });
+  let html = '', i = 0;
+  while (i < text.length) {
+    const tc = tokenClasses ? tokenClasses[i] : null;
+    const tv = per[i];
+    let j = i + 1;
+    while (j < text.length && (tokenClasses ? tokenClasses[j] : null) === tc && per[j] === tv) j++;
+    const cls = [tc, tv ? 'typo-' + tv : null].filter(Boolean).join(' ');
+    const chunk = escapeHTML(text.slice(i, j));
+    html += cls
+      ? `<span class="${cls}"${tv ? ` data-typo-run="${i}"` : ''}>${chunk}</span>`
+      : chunk;
+    i = j;
+  }
+  return html;
+}
+
+// Per-character syntax classes for a code line, so highlighting survives styling.
+function codeTokenClasses(line) {
+  const n = line.code.length;
+  if (line.kind === 'cm') return new Array(n).fill('tok-cm');
+  if (line.kind === 'kw') {
+    const sp = line.code.indexOf(' ');
+    const cut = sp === -1 ? n : sp;
+    return Array.from({ length: n }, (_, i) => (i < cut ? 'tok-kw' : null));
+  }
   return null;
 }
+
+// Maps a (node, offset) DOM position inside `el` to a character index.
+function charIndexIn(el, node, offset) {
+  if (node === el) {
+    let idx = 0;
+    for (let k = 0; k < offset && k < el.childNodes.length; k++) idx += el.childNodes[k].textContent.length;
+    return idx;
+  }
+  if (!el.contains(node)) return null;
+  let idx = 0, found = false;
+  (function walk(n) {
+    if (found) return;
+    if (n.nodeType === 3) {
+      if (n === node) { idx += offset; found = true; return; }
+      idx += n.nodeValue.length;
+    } else {
+      for (const c of n.childNodes) { walk(c); if (found) return; }
+    }
+  })(el);
+  return found ? idx : null;
+}
+
+// Turns the current text selection into typography ranges on every text element it touches.
+function paintSelectionWithBrush() {
+  if (!typoBrush) return false;
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return false;
+  const mock = document.getElementById('mockActive');
+  if (!mock) return false;
+  const range = sel.getRangeAt(0);
+  let painted = false;
+
+  mock.querySelectorAll('[data-typo-key]').forEach(el => {
+    if (!range.intersectsNode(el)) return;
+    const text = el.textContent;
+    if (!text.length) return;
+    const elRange = document.createRange();
+    elRange.selectNodeContents(el);
+
+    let start = range.compareBoundaryPoints(Range.START_TO_START, elRange) <= 0
+      ? 0 : charIndexIn(el, range.startContainer, range.startOffset);
+    let end = range.compareBoundaryPoints(Range.END_TO_END, elRange) >= 0
+      ? text.length : charIndexIn(el, range.endContainer, range.endOffset);
+    if (start === null) start = 0;
+    if (end === null) end = text.length;
+    if (end <= start) return;
+
+    const key = el.dataset.typoKey;
+    (typoSegments[key] = typoSegments[key] || []).push({ start, end, variant: typoBrush });
+    painted = true;
+  });
+
+  if (painted) { sel.removeAllRanges(); renderCanvas(); }
+  return painted;
+}
+
+document.addEventListener('mouseup', () => {
+  if (!typoBrush) return;
+  // let the browser finish updating the selection before reading it
+  setTimeout(paintSelectionWithBrush, 0);
+});
+
+// Clicking a styled run removes the range that covers it (when the brush is off).
+document.addEventListener('click', (e) => {
+  if (typoBrush) return;
+  const run = e.target.closest('[data-typo-run]');
+  if (!run) return;
+  const host = run.closest('[data-typo-key]');
+  if (!host) return;
+  const key = host.dataset.typoKey;
+  const at = parseInt(run.dataset.typoRun, 10);
+  const segs = typoSegments[key] || [];
+  for (let i = segs.length - 1; i >= 0; i--) {
+    if (at >= segs[i].start && at < segs[i].end) { segs.splice(i, 1); break; }
+  }
+  if (!segs.length) delete typoSegments[key];
+  renderCanvas();
+});
 
 function enableReposition(el, chip) {
   el.addEventListener('pointerdown', (e) => {
@@ -961,7 +1144,7 @@ function mockRepoHTML() {
   const fileRows = repoFiles.map(f => `
     <div class="gh-file-row" data-file="${escapeHTML(f.name)}">
       <span class="gh-file-icon">${f.dir ? '📁' : fileIcon(f.name)}</span>
-      <span class="gh-file-name">${escapeHTML(f.name)}${f.custom ? '<span class="gh-new-tag">new</span>' : ''}</span>
+      <span class="gh-file-name" data-typo-key="repo:${escapeHTML(f.name)}">${renderTypoText('repo:' + f.name, f.name, null)}</span>${f.custom ? '<span class="gh-new-tag">new</span>' : ''}
       <span class="gh-file-msg">${escapeHTML(f.msg)}</span>
       <span class="gh-file-time">${escapeHTML(f.time)}</span>
       ${f.custom ? `<button class="gh-file-del" data-del-file="${escapeHTML(f.name)}" title="Remove file">✕</button>` : ''}
@@ -1041,7 +1224,11 @@ function mockRepoHTML() {
       <div class="gh-readme-tab">📖 README</div>
       <div class="gh-readme-body">
         <h2>${escapeHTML(REPO_META.readmeTitle)}</h2>
-        <p class="gh-muted">${escapeHTML(REPO_META.readmeSub)}</p>
+        <h3>${escapeHTML(REPO_META.readmeSub)}</h3>
+        <ul>
+          ${REPO_META.readmeLinks.map(([t, u]) =>
+            `<li>${escapeHTML(t)}: <a href="#">${escapeHTML(u)}</a></li>`).join('')}
+        </ul>
       </div>
     </div>
   </div>`;
@@ -1049,7 +1236,7 @@ function mockRepoHTML() {
 function mockFolderHTML() {
   const rows = folderEntries.map(f => `
     <div class="gh-table-row" data-file="${escapeHTML(f.name)}">
-      <span class="gh-table-name"><span class="gh-file-icon">${f.dir ? '📁' : fileIcon(f.name)}</span><span class="gh-name-text">${escapeHTML(f.name)}</span></span>
+      <span class="gh-table-name"><span class="gh-file-icon">${f.dir ? '📁' : fileIcon(f.name)}</span><span class="gh-name-text" data-typo-key="folder:${escapeHTML(f.name)}">${renderTypoText('folder:' + f.name, f.name, null)}</span></span>
       <span class="gh-table-msg">${f.parent ? '' : escapeHTML(f.msg)}</span>
       <span class="gh-table-time">${f.parent ? '' : escapeHTML(f.time)}</span>
     </div>`).join('');
@@ -1084,7 +1271,7 @@ function mockFolderHTML() {
 function mockFileHTML() {
   const lines = FILE_CODE.map((line, i) => `
     <div class="code-line" data-line="${i}">
-      <span class="ln">${i + 1}</span><span class="code">${renderCodeLine(line)}</span>
+      <span class="ln">${i + 1}</span><span class="code" data-typo-key="line:${i}">${renderTypoText('line:' + i, line.code, codeTokenClasses(line))}</span>
     </div>`).join('');
 
   return `
@@ -1127,11 +1314,10 @@ function renderCanvas() {
   else if (activeLocation === 'folder') inner = mockFolderHTML();
   else inner = mockFileHTML();
 
-  host.innerHTML = `<div class="mock mock-${activeLocation}" id="mockActive">${inner}</div>`;
+  host.innerHTML = `<div class="mock mock-${activeLocation}${typoBrush ? ' brush-on' : ''}" id="mockActive">${inner}</div>`;
   const mock = document.getElementById('mockActive');
 
   chipsByLocation[activeLocation].forEach(chip => {
-    applyTypoTarget(mock, chip);
     const el = document.createElement('div');
     el.className = 'placed-chip';
     el.style.left = chip.x + 'px';
@@ -1147,20 +1333,6 @@ function renderCanvas() {
   });
 
   if (activeLocation === 'repo') wireRepoControls(mock);
-}
-
-// Restyles the text a Typography chip was dropped on. Re-applied on every render
-// because the canvas HTML is rebuilt from scratch each time.
-function applyTypoTarget(mock, chip) {
-  if (!chip.typoTarget) return;
-  const textEl = mock.querySelector(chip.typoTarget);
-  if (!textEl) return;
-  const typo = chip.config.visual.find(v => v.style === 'typography');
-  if (!typo) return;
-  const variant = variantOf('typography', typo.variant);
-  if (variant.id === 'font') textEl.classList.add('typo-font');
-  else if (variant.id === 'highlight') textEl.classList.add('typo-highlight');
-  else textEl.classList.add('typo-color');
 }
 
 function cssEscape(s) {
@@ -1214,6 +1386,7 @@ function wireRepoControls(mock) {
 
 document.getElementById('clearBtn').addEventListener('click', () => {
   chipsByLocation[activeLocation] = [];
+  typoSegments = {};
   renderCanvas();
 });
 
@@ -1243,8 +1416,6 @@ function setupPanelToggle(btnId, bodyId) {
 renderTabs();
 renderLabelsPanel();
 renderVisualPanel();
-updateBuildPreview();
-renderTray();
 renderCanvas();
 setupPanelToggle('labelsToggle', 'labelsBody');
 setupPanelToggle('visualToggle', 'visualBody');
