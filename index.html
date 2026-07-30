@@ -1150,8 +1150,8 @@ function updateComposer() {
     const extra = nonTypoParts().length;
     note.innerHTML = `<div class="brush-note">
       <b>Typography armed: ${escapeHTML(names)}</b><br/>
-      Select any text in the canvas to apply it to exactly that range — part of a line,
-      a whole line, or several lines.${extra ? ' The other parts of this chip get pinned at the end of the range.' : ''}
+      Select any text in the canvas — a filename, a heading, a sidebar entry, an issue
+      title, code — to apply it to exactly that range.${extra ? ' The other parts of this chip get pinned at the end of the range.' : ''}
       Click a styled run to remove it.
     </div>`;
   } else {
@@ -1261,6 +1261,67 @@ function renderTypoText(key, text, tokenClasses) {
     i = j;
   }
   return html;
+}
+
+// Every piece of text in the canvas is a typography target. Code lines are wrapped
+// while their HTML is built (they need syntax tokens woven in); everything else is
+// registered here, after render, so no element has to be listed by hand.
+
+// Text sitting alongside other nodes gets its own span, so that fragment becomes
+// addressable too instead of being stranded in a mixed-content parent.
+function splitLooseText(mock) {
+  const walker = document.createTreeWalker(mock, NodeFilter.SHOW_TEXT);
+  const loose = [];
+  let n;
+  while ((n = walker.nextNode())) {
+    if (!n.nodeValue.trim()) continue;
+    const parent = n.parentElement;
+    if (!parent || parent.dataset.typoKey) continue;
+    if (parent.childNodes.length > 1) loose.push(n);
+  }
+  loose.forEach(node => {
+    const span = document.createElement('span');
+    span.className = 'txt-frag';
+    span.textContent = node.nodeValue;
+    node.parentNode.replaceChild(span, node);
+  });
+}
+
+// A key that survives re-render: climb to the nearest identifying ancestor
+// (a file row, a code line, an issue row) and record the path below it, falling
+// back to a structural path from the canvas root.
+function typoKeyFor(el, mock) {
+  const parts = [];
+  let node = el;
+  while (node && node !== mock) {
+    const d = node.dataset || {};
+    const anchor = d.file ? 'f=' + d.file : d.line ? 'l=' + d.line : d.issue ? 'i=' + d.issue : null;
+    if (anchor) { parts.unshift(anchor); break; }
+    const parent = node.parentElement;
+    if (!parent) break;
+    parts.unshift(Array.prototype.indexOf.call(parent.children, node));
+    node = parent;
+  }
+  return activeLocation + ':' + parts.join('/');
+}
+
+function registerTypoTargets(mock) {
+  splitLooseText(mock);
+  mock.querySelectorAll('*').forEach(el => {
+    if (el.dataset.typoKey) return;              // code lines are already wrapped
+    if (el.children.length) return;              // only innermost text holders
+    if (el.closest('.range-badge')) return;      // pinned chips are not page text
+    // Never nest a target inside another one: the syntax-token spans inside a
+    // painted code line are fragments of that line, not separate targets, and
+    // registering them would make one selection paint the same text twice.
+    if (el.parentElement && el.parentElement.closest('[data-typo-key]')) return;
+    const text = el.textContent;
+    if (!text || !text.trim()) return;
+    const key = typoKeyFor(el, mock);
+    el.dataset.typoKey = key;
+    const segs = typoSegments[key];
+    if (segs && segs.length) el.innerHTML = renderTypoText(key, text, null);
+  });
 }
 
 // Maps a (node, offset) DOM position inside `el` to a character index.
@@ -1385,7 +1446,7 @@ function mockRepoHTML() {
   const fileRows = repoFiles.map(f => `
     <div class="gh-file-row" data-file="${escapeHTML(f.name)}">
       <span class="gh-file-icon">${f.dir ? '📁' : fileIcon(f.name)}</span>
-      <span class="gh-file-name" data-typo-key="repo:${escapeHTML(f.name)}">${renderTypoText('repo:' + f.name, f.name, null)}</span>${f.custom ? '<span class="gh-new-tag">new</span>' : ''}
+      <span class="gh-file-name">${escapeHTML(f.name)}</span>${f.custom ? '<span class="gh-new-tag">new</span>' : ''}
       <span class="gh-file-msg">${escapeHTML(f.msg)}</span>
       <span class="gh-file-time">${escapeHTML(f.time)}</span>
       ${f.custom ? `<button class="gh-file-del" data-del-file="${escapeHTML(f.name)}" title="Remove file">✕</button>` : ''}
@@ -1522,11 +1583,11 @@ function ghIssueNavHTML() {
 
 function mockIssueListHTML() {
   const rows = ISSUE_LIST.map(it => `
-    <div class="gh-issue-row">
+    <div class="gh-issue-row" data-issue="${it.n}">
       <span class="iss-ico ${it.state}"></span>
       <div class="gh-issue-main">
         <div class="gh-issue-titleline">
-          <span class="gh-issue-title" data-typo-key="issue:${it.n}">${renderTypoText('issue:' + it.n, it.title, null)}</span>
+          <span class="gh-issue-title">${escapeHTML(it.title)}</span>
           ${it.labels.map(([t, k]) => `<span class="gh-label-pill ${k}">${escapeHTML(t)}</span>`).join('')}
         </div>
         <div class="gh-issue-meta">#${it.n} · ${escapeHTML(it.meta)}</div>
@@ -1597,7 +1658,7 @@ function mockIssueDetailHTML() {
   <div class="gh-repo">
     ${ghIssueNavHTML()}
     <div class="gh-detail-head">
-      <h1 data-typo-key="issuedetail:title">${renderTypoText('issuedetail:title', d.title, null)} <span class="gh-issue-num">#${d.n}</span></h1>
+      <h1><span class="gh-issue-h1">${escapeHTML(d.title)}</span> <span class="gh-issue-num">#${d.n}</span></h1>
       <span class="gh-btn-primary">New issue</span><span class="gh-copyicon">⧉</span>
     </div>
     <div class="gh-detail-badges">
@@ -1611,7 +1672,7 @@ function mockIssueDetailHTML() {
             <span class="gh-avatar sm"></span><b>${escapeHTML(d.author)}</b> ${escapeHTML(d.opened)}
             <span class="gh-spacer"></span><span class="gh-owner-pill">Owner</span><span class="gh-muted">···</span>
           </div>
-          <div class="gh-comment-text" data-typo-key="issuedetail:body">${renderTypoText('issuedetail:body', d.body, null)}</div>
+          <div class="gh-comment-text">${escapeHTML(d.body)}</div>
           <div class="gh-reactions"><span class="gh-react">🙂</span><span class="gh-react">👀 1</span></div>
         </div>
         <div class="gh-timeline">${timeline}</div>
@@ -1665,7 +1726,7 @@ function mockIssuesHTML() {
 function mockFolderHTML() {
   const rows = folderEntries.map(f => `
     <div class="gh-table-row" data-file="${escapeHTML(f.name)}">
-      <span class="gh-table-name"><span class="gh-file-icon">${f.dir ? '📁' : fileIcon(f.name)}</span><span class="gh-name-text" data-typo-key="folder:${escapeHTML(f.name)}">${renderTypoText('folder:' + f.name, f.name, null)}</span></span>
+      <span class="gh-table-name"><span class="gh-file-icon">${f.dir ? '📁' : fileIcon(f.name)}</span><span class="gh-name-text">${escapeHTML(f.name)}</span></span>
       <span class="gh-table-msg">${f.parent ? '' : escapeHTML(f.msg)}</span>
       <span class="gh-table-time">${f.parent ? '' : escapeHTML(f.time)}</span>
     </div>`).join('');
@@ -1745,6 +1806,7 @@ function renderCanvas() {
 
   host.innerHTML = `<div class="mock mock-${activeLocation}${armedTypoVariants().length ? ' brush-on' : ''}" id="mockActive">${inner}</div>`;
   const mock = document.getElementById('mockActive');
+  registerTypoTargets(mock);
 
   chipsByLocation[activeLocation].forEach(chip => {
     const el = document.createElement('div');
