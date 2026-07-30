@@ -458,6 +458,8 @@ const T_LABELS = [
 
 // Inline SVG marks so index.html stays a single self-contained file.
 const MARK_SVG = {
+  copilot: '<svg viewBox="0 0 64 50" xmlns="http://www.w3.org/2000/svg" aria-label="GitHub Copilot mark"><g fill="#0D1117"><rect x="0.6" y="23" width="12.5" height="20" rx="6.2"/><rect x="50.9" y="23" width="12.5" height="20" rx="6.2"/><path d="M7.7 30C7.7 10 18 0.8 32 0.8S56.6 10 56.6 30C56.6 42.5 46 49.2 32 49.2S7.7 42.5 7.7 30Z"/></g><g fill="#FFFFFF"><rect x="12.1" y="6.0" width="16.8" height="17.4" rx="5.6"/><rect x="35.1" y="6.0" width="16.8" height="17.4" rx="5.6"/><rect x="29.5" y="12.9" width="5.0" height="4.0" rx="1.2"/><path d="M15.5 27.5C15.5 25.6 17 24.2 18.9 24.2H45.1C47 24.2 48.5 25.6 48.5 27.5V40.4C48.5 42 47.4 43.4 45.8 43.8C41.5 44.9 36.8 45.5 32 45.5S22.5 44.9 18.2 43.8C16.6 43.4 15.5 42 15.5 40.4Z"/></g><g fill="#0D1117"><rect x="22.1" y="29.4" width="5.8" height="10.2" rx="2.9"/><rect x="36.1" y="29.4" width="5.8" height="10.2" rx="2.9"/></g></svg>',
+  chatgpt: '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="9.0" y="19.0" width="46" height="26" rx="13.0" fill="none" stroke="#FFFFFF" stroke-width="9.0" transform="rotate(0 32 32)"/><rect x="9.0" y="19.0" width="46" height="26" rx="13.0" fill="none" stroke="#0D1117" stroke-width="4.2" transform="rotate(0 32 32)"/><rect x="9.0" y="19.0" width="46" height="26" rx="13.0" fill="none" stroke="#FFFFFF" stroke-width="9.0" transform="rotate(60 32 32)"/><rect x="9.0" y="19.0" width="46" height="26" rx="13.0" fill="none" stroke="#0D1117" stroke-width="4.2" transform="rotate(60 32 32)"/><rect x="9.0" y="19.0" width="46" height="26" rx="13.0" fill="none" stroke="#FFFFFF" stroke-width="9.0" transform="rotate(120 32 32)"/><rect x="9.0" y="19.0" width="46" height="26" rx="13.0" fill="none" stroke="#0D1117" stroke-width="4.2" transform="rotate(120 32 32)"/></svg>',
   logo: '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Claude logo mark"><rect width="64" height="64" rx="14" fill="#CD7B5A"/><g fill="#FAF2EA" stroke="#FAF2EA" stroke-width="1.6" stroke-linejoin="round"><path d="M34.6 31.5L27.5 6.4L29.4 32.5ZM34.2 32.7L39.1 10.1L29.8 31.3ZM33.7 33.7L47.9 16.1L30.3 30.3ZM32.8 34.2L54.1 24.0L31.2 29.8ZM32.0 34.6L57.5 32.0L32.0 29.4ZM31.2 34.1L52.7 39.5L32.8 29.9ZM30.2 33.5L46.5 49.2L33.8 30.5ZM29.4 32.2L34.3 57.9L34.6 31.8ZM30.1 30.9L21.0 51.1L33.9 33.1ZM32.9 29.7L8.0 23.3L31.1 34.3ZM33.6 30.4L16.1 16.1L30.4 33.6Z"/><circle cx="32" cy="32" r="4.6"/></g></svg>',
   combined: '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Half human, half AI"><defs><linearGradient id="cfc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBBF24"/><stop offset="1" stop-color="#EE7B39"/></linearGradient><clipPath id="clh"><rect x="0" y="0" width="31.2" height="64"/></clipPath><clipPath id="crh"><rect x="32.8" y="0" width="31.2" height="64"/></clipPath></defs><g clip-path="url(#clh)"><circle cx="32" cy="35" r="27" fill="url(#cfc)"/><circle cx="20" cy="29" r="5.4" fill="#3A2A1F"/><path d="M13 45q10 9 20 3.5" stroke="#3A2A1F" stroke-width="3.4" fill="none" stroke-linecap="round"/></g><g clip-path="url(#crh)"><rect x="6" y="12" width="52" height="46" rx="13" fill="#EBEEF2"/><rect x="13" y="24" width="38" height="21" rx="9" fill="#2F3E52"/><circle cx="41" cy="34.5" r="4.2" fill="#EAEEF4"/><rect x="45.4" y="2" width="4.4" height="13" rx="2.2" fill="#F26FB0"/><circle cx="47.6" cy="2.6" r="4.2" fill="#EC4899"/></g><rect x="30.7" y="0" width="2.6" height="64" fill="#131A24"/></svg>',
 };
@@ -466,18 +468,16 @@ const VISUAL_STYLES = [
   // Icon variants are picked purely by their glyph/mark — no text labels in the picker.
   { id: 'icon', text: 'Icon', color: '#2563eb', iconPicker: true, variants: [
     { id: 'h-smile',   group: 'Human',  glyph: '\u{1F642}', text: 'Slightly smiling face' },
-    { id: 'h-grin',    group: 'Human',  glyph: '\u{1F600}', text: 'Grinning face' },
     { id: 'h-person',  group: 'Human',  glyph: '\u{1F9D1}', text: 'Person' },
     { id: 'h-bust',    group: 'Human',  glyph: '\u{1F464}', text: 'Bust in silhouette' },
-    { id: 'h-wave',    group: 'Human',  glyph: '\u{1F44B}', text: 'Waving hand' },
     { id: 'h-write',   group: 'Human',  glyph: '\u{270D}\u{FE0F}', text: 'Writing hand' },
     { id: 'r-robot',   group: 'Robot',  glyph: '\u{1F916}', text: 'Robot face' },
     { id: 'r-arm',     group: 'Robot',  glyph: '\u{1F9BE}', text: 'Mechanical arm' },
-    { id: 'r-gear',    group: 'Robot',  glyph: '\u{2699}\u{FE0F}', text: 'Gear' },
     { id: 'r-alien',   group: 'Robot',  glyph: '\u{1F47E}', text: 'Alien monster' },
     { id: 'r-laptop',  group: 'Robot',  glyph: '\u{1F4BB}', text: 'Laptop' },
-    { id: 'r-brain',   group: 'Robot',  glyph: '\u{1F9E0}', text: 'Brain' },
     { id: 'logo',      group: 'Marks',  mark: 'logo',     text: 'Claude logo mark' },
+    { id: 'copilot',   group: 'Marks',  mark: 'copilot',  text: 'GitHub Copilot mark' },
+    { id: 'chatgpt',   group: 'Marks',  mark: 'chatgpt',  text: 'ChatGPT mark (approximate)' },
     { id: 'combined',  group: 'Marks',  mark: 'combined', text: 'Half human / half AI' },
   ]},
   { id: 'typography', text: 'Typography', color: '#7c3aed', variants: [
