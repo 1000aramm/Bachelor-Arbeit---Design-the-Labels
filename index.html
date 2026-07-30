@@ -11,6 +11,7 @@
   --human-bg: #dcfce7; --human-border: #22c55e; --human-text: #15803d;
   --visual-icon: #2563eb; --visual-typo: #7c3aed; --visual-pct: #047857;
   --panel-bg: #ffffff; --app-bg: #f4f5f7; --border: #e2e8f0; --ink: #1e293b; --muted: #64748b;
+  --hot: #dc2626; /* red used to mark the interactive board and its clickable areas */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 * { box-sizing: border-box; }
@@ -102,7 +103,51 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .tray-item:hover .chip-remove { display: flex; }
 .clear-btn { font-size: 11px; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; margin-top: 8px; }
 
-.canvas-wrap { flex: 1; min-width: 0; }
+/* The board is the only interactive region of the page: mark it with a red dotted
+   frame so it is obvious where the mockup ends and the real controls begin. */
+.canvas-wrap {
+  flex: 1; min-width: 0; position: relative;
+  /* transparent when the overlay is off so nothing shifts when it is toggled */
+  border: 2px dotted transparent; border-radius: 12px; padding: 26px 12px 12px;
+}
+body.hotspots .canvas-wrap { border-color: var(--hot); }
+.board-legend { display: none; }
+body.hotspots .board-legend {
+  display: block;
+  position: absolute; top: -9px; left: 14px; background: var(--app-bg); padding: 0 7px;
+  font-size: 11px; font-weight: 700; color: var(--hot); letter-spacing: .02em;
+}
+.board-help {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-size: 11px; color: var(--muted); margin: 0 0 8px 2px;
+}
+.board-help label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; color: var(--hot); font-weight: 600; }
+.board-help .key { display: inline-flex; align-items: center; gap: 5px; }
+.board-help .swatch { width: 16px; height: 10px; border: 1.5px dotted var(--hot); border-radius: 3px; }
+.board-help .swatch.text { border: none; border-bottom: 1.5px dotted var(--hot); height: 8px; }
+
+/* clickable-area overlay: outlines never reflow the mock, unlike borders */
+body.hotspots #ghAddFileBtn,
+body.hotspots #ghNewFileName,
+body.hotspots #ghNewFileConfirm,
+body.hotspots #ghNewFileCancel,
+body.hotspots .gh-file-del,
+body.hotspots .placed-chip,
+body.hotspots .clear-btn {
+  outline: 1.5px dotted var(--hot); outline-offset: 2px;
+}
+/* the per-file remove ✕ is hover-only, so reveal it while the overlay is on */
+body.hotspots .gh-file-del { display: inline-flex; }
+/* Small offset on purpose: .gh-file-name clips with overflow:hidden, so an underline
+   pushed further down would be cut off instead of shown. */
+body.hotspots .mock [data-typo-key] {
+  text-decoration: underline dotted var(--hot); text-underline-offset: 1px;
+}
+/* In the file view every line is paintable — underlining all 79 of them would just
+   look like broken code, so the whole listing is boxed once instead. */
+body.hotspots .mock .code-line .code { text-decoration: none; }
+body.hotspots .mock .mock-code { outline: 1.5px dotted var(--hot); outline-offset: 3px; }
+
 .mock {
   position: relative; background: #fff; border: 1px solid var(--border); border-radius: 10px;
   min-height: 560px; overflow: hidden; user-select: none;
@@ -371,6 +416,13 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
   </div>
 
   <div class="canvas-wrap">
+    <span class="board-legend">BOARD — the only interactive area</span>
+    <div class="board-help">
+      <label><input type="checkbox" id="hotspotToggle" checked /> Show what's clickable</label>
+      <span class="key"><span class="swatch"></span> clickable / draggable</span>
+      <span class="key"><span class="swatch text"></span> text the typography brush can paint</span>
+      <span>everything else in the mockup is a picture, not a control</span>
+    </div>
     <div id="canvasHost"></div>
     <button class="clear-btn" id="clearBtn">Clear this board</button>
   </div>
@@ -1478,6 +1530,14 @@ function wireRepoControls(mock) {
     });
   });
 }
+
+// Clickable-area overlay is on by default; unchecking gives a clean mock for screenshots.
+const hotspotToggle = document.getElementById('hotspotToggle');
+function applyHotspots() {
+  document.body.classList.toggle('hotspots', hotspotToggle.checked);
+}
+hotspotToggle.addEventListener('change', applyHotspots);
+applyHotspots();
 
 document.getElementById('clearBtn').addEventListener('click', () => {
   chipsByLocation[activeLocation] = [];
