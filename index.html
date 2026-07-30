@@ -258,7 +258,7 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .code-line .tok-num { color: #0550ae; }
 
 /* Typography is painted onto real text as character ranges. */
-.typo-color { color: #7c3aed !important; }
+.typo-color, .typo-color * { color: #7c3aed !important; }
 /* Each variant changes exactly one thing, so stacking them is predictable:
    Color recolours, Font changes the typeface, Highlight adds a background. */
 .typo-font { font-style: italic; }
@@ -757,12 +757,16 @@ function kotlinTokenClasses(code) {
 // icon, label, percentage, label, icon ... in whatever order they were clicked.
 function partHTML(p, idx, mods) {
   const ai = `data-part-idx="${idx}"`;
-  const mc = (mods || []).map(v => 'typo-' + v).join(' ');
+  const mods2 = mods || [];
+  const mc = mods2.map(v => 'typo-' + v).join(' ');
+  const mt = mods2.length
+    ? ` title="Typography: ${mods2.map(v => variantOf('typography', v).text).join(' + ')}"`
+    : '';
   if (p.kind === 'text') {
-    return `<span class="chip-text ${mc}">${escapeHTML(labelById[p.id].text)}</span>`;
+    return `<span class="chip-text ${mc}"${mt}>${escapeHTML(labelById[p.id].text)}</span>`;
   }
   if (p.kind === 'free') {
-    return `<span class="chip-free ${mc}">${escapeHTML(p.text)}</span>`;
+    return `<span class="chip-free ${mc}"${mt}>${escapeHTML(p.text)}</span>`;
   }
   if (p.kind === 'icon') {
     const v = variantOf('icon', p.variant);
@@ -796,13 +800,17 @@ function precedingTypo(parts, i) {
   return mods;
 }
 
-function chipPartsHTML(parts, withDelete) {
+function chipPartsHTML(parts, opts) {
+  const withDelete = !!(opts && opts.withDelete);
+  const showMarkers = !!(opts && opts.showMarkers);
   let html = '';
+  let prev = null;
   for (let i = 0; i < parts.length; i++) {
     const p = parts[i];
+    // In a finished chip the marker itself is not drawn — it only styles its text.
+    if (p.kind === 'typo' && !showMarkers) continue;
     const isText = p.kind === 'text' || p.kind === 'free';
-    if (i > 0) {
-      const prev = parts[i - 1];
+    if (prev) {
       const glued = prev.kind === 'typo' && (isText || p.kind === 'typo');
       if (!glued) html += '<span class="chip-sep">·</span>';
     }
@@ -810,12 +818,14 @@ function chipPartsHTML(parts, withDelete) {
     html += withDelete
       ? `<span class="seq-part">${inner}<button class="seq-del" data-del="${i}" title="Remove">✕</button></span>`
       : inner;
+    prev = p;
   }
   return html;
 }
 
+// Rendered chips (ready slot, board, ghost, range badges) hide the markers.
 function chipInnerHTML(config) {
-  return chipPartsHTML(config.parts, false);
+  return chipPartsHTML(config.parts, {});
 }
 
 function chipHTML(config, extraClass) {
@@ -993,7 +1003,7 @@ function updateComposer() {
   if (seq.length === 0) {
     preview.innerHTML = `<span class="seq-empty">Click labels, icons, percentages or typography — they are added in the order you click.</span>`;
   } else {
-    preview.innerHTML = `<span class="chip seq-chip">${chipPartsHTML(seq, true)}</span>`;
+    preview.innerHTML = `<span class="chip seq-chip">${chipPartsHTML(seq, { withDelete: true, showMarkers: true })}</span>`;
     preview.querySelectorAll('[data-del]').forEach(b =>
       b.addEventListener('click', (e) => { e.stopPropagation(); removePart(+b.dataset.del); }));
   }
@@ -1092,6 +1102,23 @@ function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 // Every piece of labelable text carries data-typo-key. Styling is stored as
 // character ranges against that key, so a range can cover part of a line, a whole
 // line, or run across many lines, and it survives the canvas being re-rendered.
+// Emits the syntax-token spans for text[from, to).
+function tokenRunsHTML(text, tokenClasses, from, to) {
+  let html = '', i = from;
+  while (i < to) {
+    const tc = tokenClasses ? tokenClasses[i] : null;
+    let j = i + 1;
+    while (j < to && (tokenClasses ? tokenClasses[j] : null) === tc) j++;
+    const chunk = escapeHTML(text.slice(i, j));
+    html += tc ? `<span class="${tc}">${chunk}</span>` : chunk;
+    i = j;
+  }
+  return html;
+}
+
+// One wrapper per painted range, with the token spans nested inside it. Wrapping
+// once (rather than tagging every token run) is what makes a highlight render as
+// a single continuous band instead of a row of separate rounded pills.
 function renderTypoText(key, text, tokenClasses) {
   const segs = typoSegments[key] || [];
   if (!text.length) return '';
@@ -1102,15 +1129,17 @@ function renderTypoText(key, text, tokenClasses) {
     for (let i = a; i < b; i++) per[i] = sg;
     if (b > a && sg.badge && sg.badge.length) (endsAt[b] = endsAt[b] || []).push(sg);
   });
+
   let html = '', i = 0;
   while (i < text.length) {
-    const tc = tokenClasses ? tokenClasses[i] : null;
     const sg = per[i];
     let j = i + 1;
-    while (j < text.length && (tokenClasses ? tokenClasses[j] : null) === tc && per[j] === sg) j++;
-    const cls = [tc].concat(sg ? sg.variants.map(v => 'typo-' + v) : []).filter(Boolean).join(' ');
-    const chunk = escapeHTML(text.slice(i, j));
-    html += cls ? `<span class="${cls}"${sg ? ` data-typo-run="${i}"` : ''}>${chunk}</span>` : chunk;
+    while (j < text.length && per[j] === sg) j++;
+    const inner = tokenRunsHTML(text, tokenClasses, i, j);
+    html += sg
+      ? `<span class="${sg.variants.map(v => 'typo-' + v).join(' ')}" data-typo-run="${i}"` +
+        ` title="Typography: ${sg.variants.map(v => variantOf('typography', v).text).join(' + ')}">${inner}</span>`
+      : inner;
     if (endsAt[j]) html += endsAt[j].map(x => `<span class="range-badge">${chipHTML({ parts: x.badge })}</span>`).join('');
     i = j;
   }
