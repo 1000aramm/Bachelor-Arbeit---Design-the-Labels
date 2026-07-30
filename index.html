@@ -121,9 +121,10 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 /* Marks are boxed to the same optical size as an emoji glyph. */
 .chip-icon-mark { display: inline-flex; width: 17px; height: 17px; flex-shrink: 0; }
 .chip-icon-mark svg { width: 100%; height: 100%; display: block; }
-.chip-typo-sample { font-weight: 700; color: var(--visual-typo); }
-.chip-typo-sample.font { font-style: italic; font-family: Georgia, serif; }
-.chip-typo-sample.highlight { background: #ede9fe; padding: 1px 5px; border-radius: 4px; }
+.chip-typo-sample { font-weight: 600; color: var(--ink); }
+.chip-typo-sample.tv-color { color: var(--visual-typo); font-weight: 800; }
+.chip-typo-sample.tv-font { font-style: italic; font-family: Georgia, serif; }
+.chip-typo-sample.tv-highlight { background: #ede9fe; padding: 1px 5px; border-radius: 4px; }
 .chip-pct { display:inline-flex; align-items:center; gap:5px; color: var(--visual-pct); cursor: pointer;}
 /* Track is grey and the fill is a deep green so the bar reads clearly at chip size.
    The track must be a flex container: .bar-fill is a span, and as a plain inline box
@@ -252,23 +253,49 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .code-line .ln { width: 30px; color: #8c959f; user-select: none; flex-shrink: 0; }
 .code-line .code { white-space: pre; color: #1f2328; }
 .code-line .tok-kw { color: #cf222e; }
-.code-line .tok-cm { color: #6e7781; }
+.code-line .tok-str { color: #0a3069; }
+.code-line .tok-num { color: #0550ae; }
 
 /* Typography is painted onto real text as character ranges. */
 .typo-color { color: #7c3aed !important; font-weight: 700; }
 .typo-font { font-style: italic; color: #7c3aed !important; }
 .typo-highlight { background: #ede9fe; border-radius: 4px; }
 [data-typo-run] { cursor: pointer; }
+/* A chip pinned at the end of a painted range: the range carries the typography,
+   the badge carries whatever else the chip was built from. */
+.range-badge { display: inline-flex; vertical-align: middle; margin: 0 0 0 6px; user-select: none; }
+.range-badge .chip { font-size: 10.5px; padding: 2px 7px; }
 
-/* Composer footers that live inside the Labels / Visual panels */
-.composer { border-top: 1px dashed var(--border); margin-top: 10px; padding-top: 9px; }
-.composer h6 {
-  font-size: 9.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
-  margin: 0 0 5px; font-weight: 700;
+/* The shared composer panel, sitting between Labels and Visual */
+.composer-panel { padding: 10px 12px; }
+.composer-panel h5 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+  margin: 0 0 8px; font-weight: 700;
 }
-.combo-caption { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-.combo-caption b { color: var(--ink); }
-.composer-preview { min-height: 30px; display: flex; align-items: center; margin-bottom: 7px; }
+.seq-preview { min-height: 34px; display: flex; align-items: center; margin-bottom: 4px; }
+.seq-empty { font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+.seq-chip { flex-wrap: wrap; }
+.seq-part { position: relative; display: inline-flex; align-items: center; }
+.seq-del {
+  width: 13px; height: 13px; border-radius: 50%; border: none; background: #ef4444; color: #fff;
+  font-size: 8px; line-height: 13px; text-align: center; padding: 0; margin-left: 3px; cursor: pointer;
+}
+.chip-sep { color: var(--muted); opacity: .45; font-size: 10px; }
+.chip-free {
+  font-size: 11.5px; font-weight: 600; color: #334155; background: #fff;
+  border: 1px dashed #94a3b8; border-radius: 6px; padding: 2px 7px;
+}
+.free-row { display: flex; gap: 5px; margin: 7px 0 8px; }
+.free-row input {
+  flex: 1; min-width: 0; font-size: 11.5px; padding: 5px 7px;
+  border: 1px solid var(--border); border-radius: 7px; color: var(--ink);
+}
+.free-row button {
+  font-size: 11.5px; padding: 5px 9px; border: 1px solid var(--border); border-radius: 7px;
+  background: #f8fafc; cursor: pointer; color: var(--ink);
+}
+.pal-hint { font-size: 10.5px; color: var(--muted); margin: 2px 0 4px 4px; }
+.vs-chev { margin-left: auto; color: var(--muted); font-size: 10px; }
 .ready-slot { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .ready-slot:empty { display: none; }
 .ready-chip { position: relative; cursor: grab; }
@@ -316,6 +343,20 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
     <div class="panel">
       <button class="panel-toggle" id="labelsToggle">🏷️ Labels <span class="chev">▸</span></button>
       <div class="panel-body" id="labelsBody"></div>
+    </div>
+
+    <div class="panel composer-panel">
+      <h5>Build a chip</h5>
+      <div class="seq-preview" id="seqPreview"></div>
+      <div class="hint" id="seqHint"></div>
+      <div class="free-row">
+        <input type="text" id="freeText" placeholder="type your own text…" maxlength="40" />
+        <button id="freeAdd">Add</button>
+      </div>
+      <button class="add-btn" id="createBtn" disabled>Create</button>
+      <div class="ready-slot" id="readySlot"></div>
+      <div class="ready-hint" id="readyHint"></div>
+      <div id="brushNote"></div>
     </div>
 
     <div class="panel">
@@ -510,14 +551,13 @@ const LOCATIONS = [
 ];
 
 // ---------- state ----------
-let selectedText = [];   // up to 2 label ids
-let selectedVisual = []; // up to 2 {style, variant}
 let activeLocation = 'repo';
 let chipsByLocation = { repo: [], folder: [], file: [] };
 let chipSeq = 1;
-let textChip = null;              // textual chip waiting to be dragged onto the board
-let typoBrush = null;             // armed typography variant id, or null
-let typoSegments = {};            // targetKey -> [{start, end, variant}] character ranges
+let seq = [];            // ordered parts currently being composed
+let readyChip = null;    // created chip waiting to be dragged onto the board
+let openStyles = {};     // which visual palettes are expanded
+let typoSegments = {};   // targetKey -> [{start, end, variants, badge}] character ranges
 
 function fileIcon(name) {
   const n = name.toLowerCase();
@@ -587,119 +627,375 @@ const folderEntries = [
   { name: 'Main.kt', dir: false, msg: 'Initial commit', time: '5 months ago' },
 ];
 
-// ---------- file mock data (modelled on a real EndGameScene.kt screenshot) ----------
+// ---------- file mock data (real PlayerService.kt, comments stripped) ----------
 const FILE_META = {
-  branch: 'main', crumbs: ['Sopra', 'src', 'main', 'kotlin', 'gui'], fileName: 'EndGameScene.kt',
+  branch: 'main', crumbs: ['Sopra', 'src', 'main', 'kotlin', 'service'], fileName: 'PlayerService.kt',
   committer: 'happzday1', commitMsg: 'Initial commit', hash: 'ee3bf8a', time: '5 months ago',
-  lines: 210, loc: 190, size: '5.95 KB',
+  lines: 208, loc: 168, size: '8.45 KB',
 };
 const FILE_CODE = [
-  { code: 'package gui', kind: 'kw' },
-  { code: '', kind: '' },
-  { code: 'import gui.components.PlayerGamePane', kind: 'kw' },
-  { code: 'import service.Refreshable', kind: 'kw' },
-  { code: 'import service.RootService', kind: 'kw' },
-  { code: 'import tools.aqua.bgw.components.ComponentView', kind: 'kw' },
-  { code: 'import tools.aqua.bgw.components.layoutviews.Pane', kind: 'kw' },
-  { code: 'import tools.aqua.bgw.components.uicomponents.Button', kind: 'kw' },
-  { code: 'import tools.aqua.bgw.components.uicomponents.Label', kind: 'kw' },
-  { code: 'import tools.aqua.bgw.core.BoardGameScene', kind: 'kw' },
-  { code: 'import tools.aqua.bgw.core.Color', kind: 'kw' },
-  { code: 'import tools.aqua.bgw.util.Font', kind: 'kw' },
-  { code: 'import tools.aqua.bgw.visual.ColorVisual', kind: 'kw' },
-  { code: 'import tools.aqua.bgw.visual.ImageVisual', kind: 'kw' },
-  { code: '', kind: '' },
-  { code: '/**', kind: 'cm' },
-  { code: ' * Scene that represents the end of a Faraway game.', kind: 'cm' },
+  "package service",
+  "",
+  "import entity.*",
+  "import service.network.ConnectionState",
+  "",
+  "class PlayerService(private val root: RootService) : AbstractRefreshingService() {",
+  "",
+  "    fun selectStartingHand(playerSelections: List<Pair<Player, List<RegionCard>>>) {",
+  "        val game = checkNotNull(root.currentGame) { \"No FarawayGame instance is running\" }",
+  "",
+  "        require(playerSelections.size in 2..6) { \"Invalid player count: must be between \" +",
+  "                \"2 and 6, but was ${playerSelections.size}\" }",
+  "        require(playerSelections.all { it.second.size == 3 }) { \"Each player must select exactly 3 region cards\" }",
+  "",
+  "        val allSelectedCards = playerSelections.flatMap { it.second }",
+  "",
+  "        require(allSelectedCards.distinct().size == allSelectedCards.size) { \"Duplicate RegionCards were selected\" }",
+  "",
+  "        for ((player, selectedCards) in playerSelections) {",
+  "            val gamePlayer = game.players.find { it.name == player.name && it.color == player.color }",
+  "            requireNotNull(gamePlayer) { \"Player ${player.name} not found in game\" }",
+  "",
+  "            gamePlayer.hand.addAll(selectedCards)",
+  "        }",
+  "",
+  "        game.regionDrawDeck.removeAll(allSelectedCards)",
+  "        repeat(game.players.size*2) {",
+  "            game.regionDrawDeck.add(0, game.regionDrawDeck.removeLast())",
+  "        }",
+  "        if (root.gameService.isNetworkGame()) {",
+  "            root.gameService.refillSelectionField()",
+  "        }",
+  "        game.undoStack.add(Memento(game.clone()))",
+  "        onAllRefreshables { refreshAfterStartGame() }",
+  "    }",
+  "",
+  "    fun selectSanctuary(sanctuary: SanctuaryCard) {",
+  "        val game = root.currentGame",
+  "        checkNotNull(game) { \"Game was not found\" }",
+  "        val player = game.players.first()",
+  "        val clues = countPlayerClues()",
+  "        val candidatesForSanctuary = game.sanctuaryDrawDeck.takeLast(clues + 1).toMutableList()",
+  "",
+  "        require(candidatesForSanctuary.contains(sanctuary)) {",
+  "            \"No such card found\"",
+  "        }",
+  "        game.sanctuaryDrawDeck.removeAll(candidatesForSanctuary)",
+  "        player.playedSanctuaries.add(sanctuary)",
+  "        candidatesForSanctuary.remove(sanctuary)",
+  "",
+  "        game.sanctuaryDrawDeck.addAll(0, candidatesForSanctuary)",
+  "",
+  "        if (root.gameService.isNetworkGame() &&",
+  "            player.playerType != PlayerType.NETWORK && player.playedRegions.size == 8) {",
+  "            root.networkService.sendPhaseTwoMessage(sanctuary,null)",
+  "        }",
+  "        game.undoStack.add(Memento(game.clone()))",
+  "        game.redoStack.clear()",
+  "",
+  "        onAllRefreshables { refreshPlaySanctuary(sanctuary) }",
+  "",
+  "    }",
+  "",
+  "    fun calculateCandidatesForSanctuary() {",
+  "        val game = root.currentGame",
+  "        checkNotNull(game) { \"Game was not found\" }",
+  "",
+  "        val clues = countPlayerClues()",
+  "        val candidatesForSanctuary = game.sanctuaryDrawDeck.takeLast(clues + 1).toMutableList()",
+  "        onAllRefreshables { refreshSelectSanctuary(candidatesForSanctuary) }",
+  "    }",
+  "",
+  "    fun countPlayerClues() : Int{",
+  "        val game = checkNotNull(root.currentGame) {\"game was not found\"}",
+  "        val player = game.players.first()",
+  "        return  player.playedSanctuaries.map { if(it.hasClue) 1 else 0 }.sum() +",
+  "                player.playedRegions.map { if (it.hasClue) 1 else 0 }.sum()",
+  "",
+  "    }",
+  "",
+  "    fun canSelectSanctuary() {",
+  "        val game = checkNotNull(root.currentGame)",
+  "        val player = game.players.first()",
+  "",
+  "        if (player.playedRegions.size > 1",
+  "            && player.playedRegions.last().duration > player.playedRegions[player.playedRegions.size-2].duration) {",
+  "            calculateCandidatesForSanctuary()",
+  "        } else {",
+  "            if (root.gameService.isNetworkGame() &&",
+  "                player.playerType != PlayerType.NETWORK && player.playedRegions.size == 8) {",
+  "                root.networkService.sendPhaseTwoMessage(null,null)",
+  "            }",
+  "            onAllRefreshables {",
+  "                refreshSelectSanctuary(mutableListOf())",
+  "            }",
+  "        }",
+  "    }",
+  "",
+  "    fun playRegion(region: RegionCard) {",
+  "        val game = checkNotNull(root.currentGame) { \"No FarawayGame instance is running\" }",
+  "",
+  "        println(game.players.first().name)",
+  "",
+  "        val currentPlayer = game.players.first()",
+  "        check(currentPlayer.playedRegions.size < 8) { \"Player ${currentPlayer.name} already has 8 played \" +",
+  "                \"regions\" }",
+  "        check(currentPlayer.selectedCard == null) { \"Player ${currentPlayer.name} has already selected a card \" +",
+  "                \"this round\" }",
+  "",
+  "        require(currentPlayer.hand.contains(region)) { \"RegionCard is not contained in the current player's hand\" }",
+  "        currentPlayer.selectedCard = region",
+  "",
+  "        game.redoStack.clear()",
+  "",
+  "        if (root.gameService.isNetworkGame() && currentPlayer.playerType != PlayerType.NETWORK) {",
+  "            root.networkService.sendSelectedRegionCardMessage(region)",
+  "        } else if (currentPlayer.playerType == PlayerType.NETWORK) {",
+  "            println(\"[PlayerService] NetworkPlayer plays their selected Region Card\")",
+  "        }",
+  "",
+  "        if (game.players.all { it.selectedCard != null }) {",
+  "",
+  "            for (player in game.players) {",
+  "                val selected = checkNotNull(player.selectedCard)",
+  "                player.hand.remove(selected)",
+  "                player.playedRegions.add(selected)",
+  "                player.selectedCard = null",
+  "            }",
+  "",
+  "            game.players.sortBy { it.playedRegions.last().duration }",
+  "",
+  "            if (root.gameService.isNetworkGame()) {",
+  "                if (game.players.first().playerType != PlayerType.NETWORK) {",
+  "                    root.networkService.updateConnectionState(ConnectionState.PLAYING_PHASE_TWO)",
+  "                } else {",
+  "                    root.networkService.updateConnectionState(ConnectionState.PLAYING_WAITING_FOR_OPPONENT_PHASE_TWO)",
+  "                }",
+  "            }",
+  "            game.undoStack.add(Memento(game.clone()))",
+  "            onAllRefreshables {",
+  "                refreshPlayRegion()",
+  "                refreshAfterNextPlayer()",
+  "            }",
+  "        } else {",
+  "            root.gameService.nextPlayer()",
+  "            if (root.gameService.isNetworkGame()) {",
+  "                if (game.players.first().playerType != PlayerType.NETWORK) {",
+  "                    root.networkService.updateConnectionState(ConnectionState.PLAYING_SELECT_REGION_CARD)",
+  "                } else {",
+  "                    root.networkService.updateConnectionState(ConnectionState.PLAYING_WAITING_FOR_OPPONENT_REGION_CARD)",
+  "                }",
+  "            }",
+  "        }",
+  "    }",
+  "",
+  "    fun drawRegion(region: RegionCard){",
+  "        val game = checkNotNull(root.currentGame) { \"Game was not found\" }",
+  "        val player = game.players.first()",
+  "",
+  "        game.redoStack.clear()",
+  "",
+  "        val canDrawRegion = player.hand.size < 3",
+  "        check(canDrawRegion) { \"Player ${player.name} has already drawn a region\" }",
+  "",
+  "        require(game.selectionField.contains(region)){ \"Selected region not found in selection field.\" }",
+  "",
+  "        player.hand.add(region)",
+  "        game.selectionField.remove(region)",
+  "",
+  "        if (root.gameService.isNetworkGame() && player.playerType != PlayerType.NETWORK) {",
+  "            var lastSanctuary: SanctuaryCard? = null",
+  "            if (player.playedRegions.size > 1",
+  "                && player.playedRegions.last().duration > player.playedRegions[player.playedRegions.size-2].duration) {",
+  "                lastSanctuary = player.playedSanctuaries.last()",
+  "            }",
+  "            root.networkService.sendPhaseTwoMessage(lastSanctuary, region)",
+  "        }",
+  "        game.undoStack.add(Memento(game.clone()))",
+  "        game.redoStack.clear()",
+  "",
+  "        onAllRefreshables {",
+  "            refreshDrawRegion()",
+  "        }",
+  "",
+  "        val isExplorationPhaseFinished = game.players.none { it.hand.size < 3 }",
+  "        if (isExplorationPhaseFinished && game.players.first().playedRegions.size < 8) {",
+  "            root.gameService.refillSelectionField()",
+  "            root.gameService.nextPlayer()",
+  "",
+  "            if (root.gameService.isNetworkGame()) {",
+  "                if (game.players.first().playerType != PlayerType.NETWORK) {",
+  "                    root.networkService.updateConnectionState(ConnectionState.PLAYING_SELECT_REGION_CARD)",
+  "                } else {",
+  "                    root.networkService.updateConnectionState(ConnectionState.PLAYING_WAITING_FOR_OPPONENT_REGION_CARD)",
+  "                }",
+  "            }",
+  "        } else {",
+  "            root.gameService.nextPlayer()",
+  "            if (root.gameService.isNetworkGame()) {",
+  "                if (game.players.first().playerType != PlayerType.NETWORK) {",
+  "                    root.networkService.updateConnectionState(ConnectionState.PLAYING_PHASE_TWO)",
+  "                } else {",
+  "                    root.networkService.updateConnectionState(ConnectionState.PLAYING_WAITING_FOR_OPPONENT_PHASE_TWO)",
+  "                }",
+  "            }",
+  "        }",
+  "    }",
+  "}"
 ];
-// ---------- chip rendering ----------
-function chipTextPartHTML(id) {
-  const l = labelById[id];
-  const cls = l.part === 'human' ? 'human' : 'ai';   // No AI (part null) is an AI-part label
-  return `<span class="chip-text ${cls}">${l.text}</span>`;
+
+const KT_KEYWORDS = new Set(['package','import','class','fun','val','var','if','else','for','in','return',
+  'private','protected','public','internal','override','open','abstract','sealed','data','enum','interface',
+  'object','companion','init','this','super','is','as','when','while','do','try','catch','finally','throw',
+  'break','continue','null','true','false','by','out','vararg','suspend','const','lateinit','typealias']);
+
+// Per-character syntax classes for one Kotlin line, so highlighting can be combined
+// with typography ranges instead of being replaced by them.
+function kotlinTokenClasses(code) {
+  const n = code.length;
+  const cls = new Array(n).fill(null);
+  for (let i = 0; i < n; ) {
+    if (code[i] === '"') {
+      let j = i + 1;
+      while (j < n) {
+        if (code[j] === '\\') { j += 2; continue; }
+        if (code[j] === '"') { j++; break; }
+        j++;
+      }
+      for (let k = i; k < Math.min(j, n); k++) cls[k] = 'tok-str';
+      i = j;
+    } else i++;
+  }
+  const re = /[A-Za-z_][A-Za-z0-9_]*|\d+/g;
+  let m;
+  while ((m = re.exec(code)) !== null) {
+    if (cls[m.index] === 'tok-str') continue;
+    const w = m[0];
+    const c = KT_KEYWORDS.has(w) ? 'tok-kw' : (/^\d+$/.test(w) ? 'tok-num' : null);
+    if (!c) continue;
+    for (let k = m.index; k < m.index + w.length; k++) if (cls[k] === null) cls[k] = c;
+  }
+  return cls;
 }
 
-function chipVisualPartHTML(v) {
-  const style = styleById[v.style];
-  const variant = variantOf(v.style, v.variant) || style.variants[0];
-  if (v.style === 'icon') {
-    return variant.mark
-      ? `<span class="chip-icon-mark" title="${variant.text}">${MARK_SVG[variant.mark]}</span>`
-      : `<span class="chip-icon-emoji" title="${variant.text}">${variant.glyph}</span>`;
+// ---------- chip rendering ----------
+// A chip is an ordered sequence of parts, so the author controls the layout:
+// icon, label, percentage, label, icon ... in whatever order they were clicked.
+function partHTML(p, idx) {
+  const ai = `data-part-idx="${idx}"`;
+  if (p.kind === 'text') {
+    const l = labelById[p.id];
+    const cls = l.part === 'human' ? 'human' : 'ai';
+    return `<span class="chip-text ${cls}">${escapeHTML(l.text)}</span>`;
   }
-  if (v.style === 'typography') {
-    const cls = variant.id === 'font' ? 'font' : (variant.id === 'highlight' ? 'highlight' : '');
-    return `<span class="chip-typo-sample ${cls}" title="${variant.text}">Aa</span>`;
+  if (p.kind === 'free') {
+    return `<span class="chip-free">${escapeHTML(p.text)}</span>`;
+  }
+  if (p.kind === 'icon') {
+    const v = variantOf('icon', p.variant);
+    return v.mark
+      ? `<span class="chip-icon-mark" title="${v.text}">${MARK_SVG[v.mark]}</span>`
+      : `<span class="chip-icon-emoji" title="${v.text}">${v.glyph}</span>`;
+  }
+  if (p.kind === 'typo') {
+    const cls = ['chip-typo-sample',
+      p.variants.includes('color') ? 'tv-color' : '',
+      p.variants.includes('font') ? 'tv-font' : '',
+      p.variants.includes('highlight') ? 'tv-highlight' : ''].join(' ').trim();
+    const names = p.variants.map(v => variantOf('typography', v).text).join(' + ');
+    return `<span class="${cls}" title="Typography: ${names}">Aa</span>`;
   }
   // percentage
-  const pctVariant = variant.id;
-  const startPct = 70;
-  if (pctVariant === 'bar') {
-    return `<span class="chip-pct" data-pctvariant="bar" data-pct="${startPct}">
-      <span class="bar-track"><span class="bar-fill" style="width:${startPct}%"></span></span>
-    </span>`;
+  const pct = p.pct || 70;
+  if (p.variant === 'bar') {
+    return `<span class="chip-pct" ${ai} data-pctvariant="bar" data-pct="${pct}">
+      <span class="bar-track"><span class="bar-fill" style="width:${pct}%"></span></span></span>`;
   }
-  if (pctVariant === 'split') {
-    return `<span class="chip-pct" data-pctvariant="split" data-pct="${startPct}"><span class="pct-label">Human ${100-startPct}% · AI ${startPct}%</span></span>`;
+  if (p.variant === 'split') {
+    return `<span class="chip-pct" ${ai} data-pctvariant="split" data-pct="${pct}"><span class="pct-label">Human ${100-pct}% · AI ${pct}%</span></span>`;
   }
-  return `<span class="chip-pct" data-pctvariant="simple" data-pct="${startPct}"><span class="pct-label">${startPct}%</span></span>`;
+  return `<span class="chip-pct" ${ai} data-pctvariant="simple" data-pct="${pct}"><span class="pct-label">${pct}%</span></span>`;
 }
 
 function chipInnerHTML(config) {
-  const parts = [];
-  config.text.forEach((id, i) => {
-    if (i > 0) parts.push('<span class="chip-plus">+</span>');
-    parts.push(chipTextPartHTML(id));
-  });
-  if (config.text.length && config.visual.length) parts.push('<span class="chip-plus">·</span>');
-  config.visual.forEach((v, i) => {
-    if (i > 0) parts.push('<span class="chip-plus">+</span>');
-    parts.push(chipVisualPartHTML(v));
-  });
-  return parts.join('');
+  return config.parts.map((p, i) => partHTML(p, i)).join('<span class="chip-sep">·</span>');
 }
 
 function chipHTML(config, extraClass) {
   return `<span class="chip ${extraClass || ''}">${chipInnerHTML(config)}</span>`;
 }
 
-// clicking a percentage badge cycles its displayed value
+function updatePctDOM(el, next) {
+  el.dataset.pct = next;
+  const v = el.dataset.pctvariant;
+  if (v === 'bar') el.querySelector('.bar-fill').style.width = next + '%';
+  else if (v === 'split') el.querySelector('.pct-label').textContent = `Human ${100-next}% · AI ${next}%`;
+  else el.querySelector('.pct-label').textContent = next + '%';
+}
+
+// Clicking a percentage badge cycles its value. On a placed chip the value is written
+// back to state so it survives the next render.
 document.addEventListener('click', (e) => {
-  const pct = e.target.closest('.chip-pct');
-  if (!pct) return;
-  const cur = parseInt(pct.dataset.pct, 10);
+  const pctEl = e.target.closest('.chip-pct');
+  if (!pctEl) return;
   const cycle = [30, 50, 70, 90];
-  const next = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
-  pct.dataset.pct = next;
-  const variant = pct.dataset.pctvariant;
-  if (variant === 'bar') {
-    pct.querySelector('.bar-fill').style.width = next + '%';
-  } else if (variant === 'split') {
-    pct.querySelector('.pct-label').textContent = `Human ${100-next}% · AI ${next}%`;
-  } else {
-    pct.querySelector('.pct-label').textContent = next + '%';
+  const next = cycle[(cycle.indexOf(parseInt(pctEl.dataset.pct, 10)) + 1) % cycle.length];
+  const idx = pctEl.dataset.partIdx;
+
+  const holder = pctEl.closest('[data-chip-id]');
+  if (holder && idx != null) {
+    const chip = chipsByLocation[activeLocation].find(c => c.id === holder.dataset.chipId);
+    if (chip) { chip.config.parts[+idx].pct = next; renderCanvas(); return; }
   }
+  if (idx != null && pctEl.closest('#seqPreview') && seq[+idx]) { seq[+idx].pct = next; updateComposer(); return; }
+  if (idx != null && pctEl.closest('#readySlot') && readyChip) { readyChip.parts[+idx].pct = next; updateComposer(); return; }
+  updatePctDOM(pctEl, next);
 });
 
-// ---------- Labels panel (textual labels only, with its own Create button) ----------
+// ---------- sequence helpers ----------
+function textPartIds() { return seq.filter(p => p.kind === 'text').map(p => p.id); }
+function typoPart() { return seq.find(p => p.kind === 'typo'); }
+function nonTypoParts() { return seq.filter(p => p.kind !== 'typo'); }
+
+// Only textual-to-textual pairing is constrained, to the vetted list from the
+// spreadsheet. Icons, percentages and free text may appear anywhere, any number
+// of times, including between two textual labels.
+function canAddText(id) {
+  const t = textPartIds();
+  if (t.includes(id)) return true;
+  if (t.length >= 2) return false;
+  if (t.length === 1) return pairIn(TT_PAIRS, t[0], id);
+  return true;
+}
+
+function addPart(part) {
+  seq.push(part);
+  renderLabelsPanel();
+  renderVisualPanel();
+  updateComposer();
+  renderCanvas();
+}
+
+function removePart(i) {
+  seq.splice(i, 1);
+  renderLabelsPanel();
+  renderVisualPanel();
+  updateComposer();
+  renderCanvas();
+}
+
+// ---------- Labels panel ----------
 function renderLabelsPanel() {
   const body = document.getElementById('labelsBody');
-  // "No AI" is an AI-part label, so it sits at the bottom of the AI column.
   const noai = T_LABELS.find(l => l.part === null);
   const ai = T_LABELS.filter(l => l.part === 'ai').concat(noai);
   const human = T_LABELS.filter(l => l.part === 'human');
-
-  function canPick(id) {
-    if (selectedText.includes(id)) return true;
-    if (selectedText.length >= 2) return false;
-    if (selectedText.length === 1) return pairIn(TT_PAIRS, selectedText[0], id);
-    return true;
-  }
+  const chosen = textPartIds();
 
   function col(list, cls, title) {
     return `<div class="label-col"><h5>${title}</h5>` + list.map(l => {
-      const sel = selectedText.includes(l.id);
-      const enabled = canPick(l.id);
+      const sel = chosen.includes(l.id);
+      const enabled = canAddText(l.id);
       return `<button class="label-btn ${cls} ${sel ? 'selected' : ''}" data-id="${l.id}" ${enabled ? '' : 'disabled'}>${l.text}</button>`;
     }).join('') + `</div>`;
   }
@@ -708,101 +1004,20 @@ function renderLabelsPanel() {
     <div class="label-cols">
       ${col(ai, 'ai', 'AI part')}
       ${col(human, 'human', 'Human part')}
-    </div>
-    <div class="composer">
-      <h6>Label chip</h6>
-      <div class="combo-caption" id="labelCaption"></div>
-      <div class="composer-preview" id="labelPreview"></div>
-      <div class="hint" id="labelHint"></div>
-      <button class="add-btn" id="createLabelBtn" disabled>Create</button>
-      <div class="ready-slot" id="labelReady"></div>
-      <div class="ready-hint" id="labelReadyHint"></div>
-    </div>
-  `;
+    </div>`;
 
   body.querySelectorAll('.label-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
-      if (selectedText.includes(id)) {
-        selectedText = selectedText.filter(x => x !== id);
-      } else if (selectedText.length < 2 && canPick(id)) {
-        selectedText.push(id);
-      }
-      renderLabelsPanel();
+      const at = seq.findIndex(p => p.kind === 'text' && p.id === id);
+      if (at !== -1) removePart(at);
+      else if (canAddText(id)) addPart({ kind: 'text', id });
     });
   });
-
-  document.getElementById('createLabelBtn').addEventListener('click', () => {
-    const state = labelComboState();
-    if (!state.valid) return;
-    // Icon / Percentage picks ride along; Typography never does — it is a brush.
-    textChip = { text: selectedText.slice(), visual: combinableVisual() };
-    selectedText = [];
-    renderLabelsPanel();
-  });
-
-  updateLabelComposer();
 }
 
-// Only textual pairings are constrained, to the vetted AI+human list.
-function labelComboState() {
-  if (selectedText.length === 0) return { valid: false, hint: '' };
-  if (selectedText.length === 2 && !pairIn(TT_PAIRS, selectedText[0], selectedText[1])) {
-    return { valid: false, hint: 'That pairing is not in the vetted T+T list.' };
-  }
-  return { valid: true, hint: '' };
-}
-
-function updateLabelComposer() {
-  const caption = document.getElementById('labelCaption');
-  const preview = document.getElementById('labelPreview');
-  const hintEl = document.getElementById('labelHint');
-  const btn = document.getElementById('createLabelBtn');
-  const ready = document.getElementById('labelReady');
-  const readyHint = document.getElementById('labelReadyHint');
-  if (!caption) return;
-  const state = labelComboState();
-
-  const withVisual = combinableVisual();
-  const visualNote = withVisual.length
-    ? ` &middot; with ${withVisual.map(v => escapeHTML(styleById[v.style].text)).join(' + ')}`
-    : '';
-
-  if (selectedText.length === 0) {
-    caption.innerHTML = 'Pick one label, or two to combine.' +
-      (withVisual.length ? ' A selected Icon / Percentage will be attached.' : '');
-    preview.innerHTML = '';
-  } else {
-    const names = selectedText.map(id => labelById[id].text);
-    caption.innerHTML = (selectedText.length === 2
-      ? `Combined: <b>${escapeHTML(names[0])}</b> + <b>${escapeHTML(names[1])}</b>`
-      : `Single: <b>${escapeHTML(names[0])}</b>`) + visualNote;
-    preview.innerHTML = chipHTML({ text: selectedText, visual: withVisual });
-  }
-  hintEl.textContent = state.hint;
-  btn.disabled = !state.valid;
-
-  if (textChip) {
-    ready.innerHTML = `<span class="ready-chip" id="labelReadyChip">${chipHTML(textChip)}<button class="chip-remove" id="labelReadyDrop">✕</button></span>`;
-    readyHint.textContent = 'Drag it onto the board.';
-    document.getElementById('labelReadyChip').addEventListener('pointerdown', (e) => {
-      if (e.target.closest('.chip-remove')) return;
-      startStampDrag(textChip, e);
-    });
-    document.getElementById('labelReadyDrop').addEventListener('click', (e) => {
-      e.stopPropagation();
-      textChip = null;
-      updateLabelComposer();
-    });
-  } else {
-    ready.innerHTML = '';
-    readyHint.textContent = '';
-  }
-}
-
-// Icon variants are grouped into Human / Robot / Marks sub-menus and shown as
-// glyphs only — the name lives in the tooltip, never as selectable text.
-function iconPickerHTML(style, sel) {
+// ---------- Visual panel: palettes that append to the sequence ----------
+function iconPaletteHTML(style) {
   const groups = [];
   style.variants.forEach(v => {
     let g = groups.find(x => x.label === v.group);
@@ -814,126 +1029,124 @@ function iconPickerHTML(style, sel) {
       <h6>${g.label}</h6>
       <div class="variant-icons">
         ${g.items.map(v => `
-          <button class="variant-icon-chip ${sel.variant === v.id ? 'selected' : ''}"
-                  data-style="${style.id}" data-variant="${v.id}" title="${v.text}">
+          <button class="variant-icon-chip" data-add-style="icon" data-variant="${v.id}" title="${v.text}">
             ${v.mark ? MARK_SVG[v.mark] : `<span class="vi-emoji">${v.glyph}</span>`}
           </button>`).join('')}
       </div>
     </div>`).join('');
 }
 
-// ---------- Visual panel ----------
 function renderVisualPanel() {
   const body = document.getElementById('visualBody');
+  const tp = typoPart();
+
   body.innerHTML = VISUAL_STYLES.map(style => {
-    const sel = selectedVisual.find(v => v.style === style.id);
-    let variantsHTML = '';
-    if (sel && style.iconPicker) variantsHTML = iconPickerHTML(style, sel);
-    else if (sel) {
-      variantsHTML = `<div class="variant-strip">` + style.variants.map(v => `
-        <span class="variant-chip ${sel.variant === v.id ? 'selected' : ''}" data-style="${style.id}" data-variant="${v.id}"
-          style="${sel.variant === v.id ? 'background:' + style.color + ';' : ''}">${v.text}</span>
-      `).join('') + `</div>`;
+    const open = !!openStyles[style.id];
+    let pal = '';
+    if (open && style.id === 'icon') pal = iconPaletteHTML(style);
+    else if (open && style.id === 'typography') {
+      pal = `<div class="variant-strip">` + style.variants.map(v => {
+        const on = tp && tp.variants.includes(v.id);
+        return `<span class="variant-chip ${on ? 'selected' : ''}" data-typo-variant="${v.id}"
+          style="${on ? 'background:' + style.color + ';' : ''}">${v.text}</span>`;
+      }).join('') + `</div><div class="pal-hint">Combine as many as you like.</div>`;
+    } else if (open) {
+      pal = `<div class="variant-strip">` + style.variants.map(v =>
+        `<span class="variant-chip" data-add-style="${style.id}" data-variant="${v.id}">${v.text}</span>`
+      ).join('') + `</div>`;
     }
     return `
       <div class="visual-style-row">
-        <button class="visual-toggle ${sel ? 'selected' : ''}" data-style="${style.id}">
+        <button class="visual-toggle ${open ? 'open' : ''}" data-style="${style.id}">
           <span class="dot" style="background:${style.color}"></span>${style.text}
+          <span class="vs-chev">${open ? '▾' : '▸'}</span>
         </button>
-        ${variantsHTML}
+        ${pal}
       </div>`;
   }).join('');
 
-  body.insertAdjacentHTML('beforeend', `
-    <div class="composer">
-      <h6>Visual chip</h6>
-      <div class="ready-slot" id="visualReady"></div>
-      <div class="ready-hint" id="visualReadyHint"></div>
-      <div id="brushNote"></div>
-    </div>`);
-
   body.querySelectorAll('.visual-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
-      const styleId = btn.dataset.style;
-      if (selectedVisual.some(v => v.style === styleId)) {
-        selectedVisual = selectedVisual.filter(v => v.style !== styleId);
-        if (styleId === 'typography') typoBrush = null;
-      } else {
-        const first = styleById[styleId].variants[0].id;
-        selectedVisual.push({ style: styleId, variant: first });
-        if (styleId === 'typography') typoBrush = first;
-      }
+      const id = btn.dataset.style;
+      openStyles[id] = !openStyles[id];
       renderVisualPanel();
-      updateLabelComposer();
-      renderCanvas();
     });
   });
 
-  body.querySelectorAll('.variant-chip, .variant-icon-chip').forEach(chip => {
-    chip.addEventListener('click', (e) => {
+  // an icon or percentage click appends that part to the sequence
+  body.querySelectorAll('[data-add-style]').forEach(el => {
+    el.addEventListener('click', (e) => {
       e.stopPropagation();
-      const styleId = chip.dataset.style;
-      const variantId = chip.dataset.variant;
-      const entry = selectedVisual.find(v => v.style === styleId);
-      if (entry) entry.variant = variantId;
-      if (styleId === 'typography') typoBrush = variantId;
-      renderVisualPanel();
-      updateLabelComposer();
-      renderCanvas();
+      const style = el.dataset.addStyle;
+      const variant = el.dataset.variant;
+      addPart(style === 'icon' ? { kind: 'icon', variant } : { kind: 'pct', variant, pct: 70 });
     });
   });
 
-  updateVisualComposer();
+  // typography variants accumulate inside a single typography part
+  body.querySelectorAll('[data-typo-variant]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const v = el.dataset.typoVariant;
+      const part = typoPart();
+      if (!part) { addPart({ kind: 'typo', variants: [v] }); return; }
+      part.variants = part.variants.includes(v)
+        ? part.variants.filter(x => x !== v)
+        : part.variants.concat(v);
+      if (!part.variants.length) removePart(seq.indexOf(part));
+      else { renderVisualPanel(); updateComposer(); renderCanvas(); }
+    });
+  });
 }
 
-// Icon and Percentage picks turn into a draggable chip the moment they are chosen —
-// no Create step, no history. Typography is not a chip ingredient: it arms a brush
-// that paints character ranges onto the real text in the canvas.
-// Visual parts that may be combined into a chip. Typography is excluded on purpose:
-// it is a brush that paints real text, not an ingredient of a chip.
-function combinableVisual() {
-  return selectedVisual
-    .filter(v => v.style !== 'typography')
-    .map(v => ({ style: v.style, variant: v.variant }));
-}
-
-function visualChipConfig() {
-  const parts = combinableVisual();
-  return parts.length ? { text: [], visual: parts } : null;
-}
-
-function updateVisualComposer() {
-  const ready = document.getElementById('visualReady');
-  const readyHint = document.getElementById('visualReadyHint');
+// ---------- the shared composer between the two panels ----------
+function updateComposer() {
+  const preview = document.getElementById('seqPreview');
+  const hint = document.getElementById('seqHint');
+  const createBtn = document.getElementById('createBtn');
+  const ready = document.getElementById('readySlot');
+  const readyHint = document.getElementById('readyHint');
   const note = document.getElementById('brushNote');
-  if (!ready) return;
 
-  const cfg = visualChipConfig();
-  if (cfg) {
-    ready.innerHTML = `<span class="ready-chip" id="visualReadyChip">${chipHTML(cfg)}</span>`;
+  if (seq.length === 0) {
+    preview.innerHTML = `<span class="seq-empty">Click labels, icons, percentages or typography — they are added in the order you click.</span>`;
+  } else {
+    preview.innerHTML = `<span class="chip seq-chip">` + seq.map((p, i) =>
+      `<span class="seq-part">${partHTML(p, i)}<button class="seq-del" data-del="${i}" title="Remove">✕</button></span>`
+    ).join('<span class="chip-sep">·</span>') + `</span>`;
+    preview.querySelectorAll('[data-del]').forEach(b =>
+      b.addEventListener('click', (e) => { e.stopPropagation(); removePart(+b.dataset.del); }));
+  }
+
+  const t = textPartIds();
+  hint.textContent = t.length >= 2 ? 'Two textual labels is the maximum (vetted pairs only).' : '';
+  createBtn.disabled = seq.length === 0;
+
+  if (readyChip) {
+    ready.innerHTML = `<span class="ready-chip" id="readyChipEl">${chipHTML(readyChip)}<button class="chip-remove" id="readyDrop">✕</button></span>`;
     readyHint.textContent = 'Drag it onto the board.';
-    document.getElementById('visualReadyChip').addEventListener('pointerdown', (e) => {
-      startStampDrag(visualChipConfig(), e);
+    document.getElementById('readyChipEl').addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.chip-remove')) return;
+      startStampDrag(readyChip, e);
+    });
+    document.getElementById('readyDrop').addEventListener('click', (e) => {
+      e.stopPropagation(); readyChip = null; updateComposer();
     });
   } else {
     ready.innerHTML = '';
-    readyHint.textContent = 'Pick an Icon or Percentage variant and the chip appears here.';
+    readyHint.textContent = '';
   }
 
-  if (typoBrush) {
-    const v = variantOf('typography', typoBrush);
+  const tp = typoPart();
+  if (tp) {
+    const names = tp.variants.map(v => variantOf('typography', v).text).join(' + ');
+    const extra = nonTypoParts().length;
     note.innerHTML = `<div class="brush-note">
-      <b>Typography brush: ${escapeHTML(v.text)}</b><br/>
-      Drag across any text in the canvas to style exactly that range — part of a line,
-      a whole line, or several lines. Click a styled run to remove it.
-      <button id="brushOff">Turn brush off</button>
+      <b>Typography armed: ${escapeHTML(names)}</b><br/>
+      Select any text in the canvas to apply it to exactly that range — part of a line,
+      a whole line, or several lines.${extra ? ' The other parts of this chip get pinned at the end of the range.' : ''}
+      Click a styled run to remove it.
     </div>`;
-    document.getElementById('brushOff').addEventListener('click', () => {
-      typoBrush = null;
-      selectedVisual = selectedVisual.filter(x => x.style !== 'typography');
-      renderVisualPanel();
-      renderCanvas();
-    });
   } else {
     note.innerHTML = '';
   }
@@ -1003,35 +1216,25 @@ function renderTypoText(key, text, tokenClasses) {
   const segs = typoSegments[key] || [];
   if (!text.length) return '';
   const per = new Array(text.length).fill(null);
+  const endsAt = {};
   segs.forEach(sg => {
-    for (let i = Math.max(0, sg.start); i < Math.min(text.length, sg.end); i++) per[i] = sg.variant;
+    const a = Math.max(0, sg.start), b = Math.min(text.length, sg.end);
+    for (let i = a; i < b; i++) per[i] = sg;
+    if (b > a && sg.badge && sg.badge.length) (endsAt[b] = endsAt[b] || []).push(sg);
   });
   let html = '', i = 0;
   while (i < text.length) {
     const tc = tokenClasses ? tokenClasses[i] : null;
-    const tv = per[i];
+    const sg = per[i];
     let j = i + 1;
-    while (j < text.length && (tokenClasses ? tokenClasses[j] : null) === tc && per[j] === tv) j++;
-    const cls = [tc, tv ? 'typo-' + tv : null].filter(Boolean).join(' ');
+    while (j < text.length && (tokenClasses ? tokenClasses[j] : null) === tc && per[j] === sg) j++;
+    const cls = [tc].concat(sg ? sg.variants.map(v => 'typo-' + v) : []).filter(Boolean).join(' ');
     const chunk = escapeHTML(text.slice(i, j));
-    html += cls
-      ? `<span class="${cls}"${tv ? ` data-typo-run="${i}"` : ''}>${chunk}</span>`
-      : chunk;
+    html += cls ? `<span class="${cls}"${sg ? ` data-typo-run="${i}"` : ''}>${chunk}</span>` : chunk;
+    if (endsAt[j]) html += endsAt[j].map(x => `<span class="range-badge">${chipHTML({ parts: x.badge })}</span>`).join('');
     i = j;
   }
   return html;
-}
-
-// Per-character syntax classes for a code line, so highlighting survives styling.
-function codeTokenClasses(line) {
-  const n = line.code.length;
-  if (line.kind === 'cm') return new Array(n).fill('tok-cm');
-  if (line.kind === 'kw') {
-    const sp = line.code.indexOf(' ');
-    const cut = sp === -1 ? n : sp;
-    return Array.from({ length: n }, (_, i) => (i < cut ? 'tok-kw' : null));
-  }
-  return null;
 }
 
 // Maps a (node, offset) DOM position inside `el` to a character index.
@@ -1057,7 +1260,10 @@ function charIndexIn(el, node, offset) {
 
 // Turns the current text selection into typography ranges on every text element it touches.
 function paintSelectionWithBrush() {
-  if (!typoBrush) return false;
+  const tp = typoPart();
+  if (!tp) return false;
+  const variants = tp.variants.slice();
+  const badge = nonTypoParts().map(x => JSON.parse(JSON.stringify(x)));
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return false;
   const mock = document.getElementById('mockActive');
@@ -1081,7 +1287,7 @@ function paintSelectionWithBrush() {
     if (end <= start) return;
 
     const key = el.dataset.typoKey;
-    (typoSegments[key] = typoSegments[key] || []).push({ start, end, variant: typoBrush });
+    (typoSegments[key] = typoSegments[key] || []).push({ start, end, variants, badge });
     painted = true;
   });
 
@@ -1090,14 +1296,13 @@ function paintSelectionWithBrush() {
 }
 
 document.addEventListener('mouseup', () => {
-  if (!typoBrush) return;
+  if (!typoPart()) return;
   // let the browser finish updating the selection before reading it
   setTimeout(paintSelectionWithBrush, 0);
 });
 
 // Clicking a styled run removes the range that covers it (when the brush is off).
 document.addEventListener('click', (e) => {
-  if (typoBrush) return;
   const run = e.target.closest('[data-typo-run]');
   if (!run) return;
   const host = run.closest('[data-typo-key]');
@@ -1280,9 +1485,9 @@ function mockFolderHTML() {
 }
 
 function mockFileHTML() {
-  const lines = FILE_CODE.map((line, i) => `
+  const lines = FILE_CODE.map((code, i) => `
     <div class="code-line" data-line="${i}">
-      <span class="ln">${i + 1}</span><span class="code" data-typo-key="line:${i}">${renderTypoText('line:' + i, line.code, codeTokenClasses(line))}</span>
+      <span class="ln">${i + 1}</span><span class="code" data-typo-key="line:${i}">${renderTypoText('line:' + i, code, kotlinTokenClasses(code))}</span>
     </div>`).join('');
 
   return `
@@ -1310,7 +1515,6 @@ function mockFileHTML() {
         <span class="gh-btn gh-code-btn">&lt;&gt;</span>
       </div>
       <div class="mock-code">${lines}</div>
-      <div class="gh-code-more">⋯ ${FILE_META.lines - FILE_CODE.length} more lines not shown in this mock</div>
     </div>
   </div>`;
 }
@@ -1325,12 +1529,13 @@ function renderCanvas() {
   else if (activeLocation === 'folder') inner = mockFolderHTML();
   else inner = mockFileHTML();
 
-  host.innerHTML = `<div class="mock mock-${activeLocation}${typoBrush ? ' brush-on' : ''}" id="mockActive">${inner}</div>`;
+  host.innerHTML = `<div class="mock mock-${activeLocation}${typoPart() ? ' brush-on' : ''}" id="mockActive">${inner}</div>`;
   const mock = document.getElementById('mockActive');
 
   chipsByLocation[activeLocation].forEach(chip => {
     const el = document.createElement('div');
     el.className = 'placed-chip';
+    el.dataset.chipId = chip.id;
     el.style.left = chip.x + 'px';
     el.style.top = chip.y + 'px';
     el.innerHTML = chipHTML(chip.config) + `<button class="chip-remove" data-remove-chip="${chip.id}">✕</button>`;
@@ -1423,10 +1628,33 @@ function setupPanelToggle(btnId, bodyId) {
   });
 }
 
+document.getElementById('createBtn').addEventListener('click', () => {
+  if (!seq.length) return;
+  readyChip = { parts: JSON.parse(JSON.stringify(seq)) };
+  seq = [];
+  renderLabelsPanel();
+  renderVisualPanel();
+  updateComposer();
+  renderCanvas();
+});
+
+function addFreeText() {
+  const input = document.getElementById('freeText');
+  const t = input.value.trim();
+  if (!t) return;
+  input.value = '';
+  addPart({ kind: 'free', text: t });
+}
+document.getElementById('freeAdd').addEventListener('click', addFreeText);
+document.getElementById('freeText').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); addFreeText(); }
+});
+
 // ---------- init ----------
 renderTabs();
 renderLabelsPanel();
 renderVisualPanel();
+updateComposer();
 renderCanvas();
 setupPanelToggle('labelsToggle', 'labelsBody');
 setupPanelToggle('visualToggle', 'visualBody');
