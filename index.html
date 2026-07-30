@@ -223,6 +223,122 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .gh-readme-body { padding: 16px 20px; }
 .gh-readme-body h2 { margin: 0 0 10px; font-size: 22px; border-bottom: 1px solid #d0d7de; padding-bottom: 8px; }
 
+/* --- issue mocks: two stacked screens in one canvas --- */
+.mock-issues { min-height: 0; overflow: visible; background: none; border: none; }
+.issue-stack { display: flex; flex-direction: column; gap: 22px; }
+.issue-shot { position: relative; }
+.shot-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--muted);
+  font-family: "SF Mono", Menlo, Consolas, monospace; margin: 0 0 5px 2px;
+}
+.gh-burger { color: #656d76; }
+.gh-forkmark { color: #656d76; }
+.gh-count { font-size: 11px; background: #eef1f4; border-radius: 999px; padding: 0 6px; color: #656d76; font-weight: 600; }
+.gh-subnav span.active .gh-count { background: #dfe3e8; }
+.gh-btn-primary {
+  background: #1f883d; color: #fff; font-size: 12.5px; font-weight: 600;
+  border-radius: 6px; padding: 5px 12px; white-space: nowrap;
+}
+.gh-btn-primary.disabled { background: #94d3a2; }
+
+.gh-issue-layout { display: flex; }
+.gh-iss-sidebar { width: 190px; flex-shrink: 0; padding: 12px 8px; border-right: 1px solid #d0d7de; }
+.gh-iss-nav { font-size: 12.5px; padding: 6px 8px; border-radius: 6px; color: #1f2328; display: flex; align-items: center; gap: 7px; }
+.gh-iss-nav.active { background: #eef1f4; font-weight: 600; box-shadow: inset 2px 0 0 #fd8c73; }
+.gh-iss-sidebar hr { border: none; border-top: 1px solid #d0d7de; margin: 9px 4px; }
+.gh-preview-pill { font-size: 9.5px; border: 1px solid #1f883d; color: #1f883d; border-radius: 999px; padding: 0 6px; }
+
+.gh-iss-main { flex: 1; min-width: 0; padding: 14px 16px; }
+.gh-iss-head { display: flex; align-items: center; gap: 10px; }
+.gh-iss-head h2 { font-size: 20px; margin: 0; flex: 1; }
+.gh-iss-search {
+  margin: 12px 0 10px; border: 1px solid #d0d7de; border-radius: 6px; padding: 6px 10px;
+  font-size: 12.5px; display: flex; align-items: center;
+}
+.gh-sel { background: #ddf4ff; }
+.gh-iss-search-icons { margin-left: auto; color: #656d76; font-size: 11px; }
+.gh-filter-bar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  border: 1px solid #d0d7de; border-radius: 6px 6px 0 0; background: #f6f8fa; padding: 8px 12px; font-size: 12.5px;
+}
+.gh-filter-tab { color: #656d76; }
+.gh-filter-tab.active { color: #1f2328; font-weight: 600; }
+.gh-filter-menu { color: #656d76; white-space: nowrap; }
+.gh-issue-list { border: 1px solid #d0d7de; border-top: none; }
+.gh-issue-row { display: flex; gap: 9px; padding: 9px 12px; border-bottom: 1px solid #d8dee4; align-items: flex-start; }
+.gh-issue-row:last-child { border-bottom: none; }
+.gh-issue-row:hover { background: #f6f8fa; }
+.iss-ico {
+  width: 15px; height: 15px; border-radius: 50%; border: 2px solid currentColor; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center; margin-top: 2px;
+}
+.iss-ico.open { color: #1a7f37; }
+.iss-ico.open::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.iss-ico.closed { color: #8250df; }
+.iss-ico.closed::after { content: '✓'; font-size: 9px; font-weight: 800; }
+.gh-issue-main { flex: 1; min-width: 0; }
+.gh-issue-titleline { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.gh-issue-title { font-size: 14px; font-weight: 600; color: #1f2328; }
+.gh-issue-meta { font-size: 11.5px; color: #656d76; margin-top: 3px; }
+.gh-label-pill { font-size: 10.5px; border-radius: 999px; padding: 1px 9px; white-space: nowrap; }
+.gh-label-pill.enh { background: #9fe8e0; color: #04413b; }
+.gh-label-pill.plain { background: #eef1f4; color: #3d444d; border: 1px solid #d0d7de; }
+.gh-issue-right { display: flex; align-items: center; gap: 10px; color: #656d76; font-size: 11.5px; flex-shrink: 0; }
+.gh-issue-cop { display: inline-flex; width: 15px; height: 15px; }
+.gh-issue-cop svg { width: 100%; height: 100%; }
+.gh-iss-foot { text-align: right; margin-top: 10px; }
+.gh-iss-foot a { color: #0969da; font-size: 12px; text-decoration: none; }
+
+/* issue detail */
+.gh-detail-head { display: flex; align-items: flex-start; gap: 10px; padding: 16px 16px 6px; }
+.gh-detail-head h1 { font-size: 26px; font-weight: 400; margin: 0; flex: 1; line-height: 1.25; }
+.gh-issue-num { color: #59636e; font-weight: 300; }
+.gh-detail-badges { display: flex; align-items: center; gap: 8px; padding: 0 16px 12px; }
+.gh-state-badge { background: #8250df; color: #fff; border-radius: 999px; padding: 4px 12px; font-size: 12.5px; font-weight: 500; }
+.gh-linked-pr { border: 1px solid #d0d7de; border-radius: 999px; padding: 3px 10px; font-size: 12px; color: #59636e; }
+.gh-detail-body { display: flex; gap: 18px; padding: 0 16px 14px; align-items: flex-start; }
+.gh-detail-main { flex: 1; min-width: 0; }
+.gh-comment-box { border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; }
+.gh-comment-head { display: flex; align-items: center; gap: 7px; padding: 8px 12px; background: #f6f8fa; border-bottom: 1px solid #d0d7de; font-size: 12.5px; }
+.gh-owner-pill { font-size: 10.5px; border: 1px solid #d0d7de; border-radius: 999px; padding: 1px 8px; color: #59636e; }
+.gh-comment-text { padding: 12px; font-size: 13px; line-height: 1.55; }
+.gh-reactions { display: flex; gap: 7px; padding: 0 12px 12px; }
+.gh-react { border: 1px solid #d0d7de; border-radius: 999px; padding: 2px 9px; font-size: 11.5px; }
+.gh-timeline { padding: 6px 0 4px 6px; }
+.gh-tl-item { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; position: relative; }
+.gh-tl-item::before { content: ''; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: #d0d7de; }
+.gh-tl-item:first-child::before { top: 12px; }
+.gh-tl-item:last-child::before { bottom: 50%; }
+.gh-tl-dot {
+  width: 26px; height: 26px; border-radius: 50%; background: #eef1f4; border: 2px solid #fff;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; z-index: 1;
+}
+.gh-tl-dot.done { background: #8250df; color: #fff; }
+.gh-tl-body { font-size: 12.5px; padding-top: 4px; }
+.gh-tl-sub { margin-top: 5px; font-size: 12.5px; }
+.gh-addcomment-h { font-size: 15px; margin: 14px 0 8px; }
+.gh-addcomment { border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; }
+.gh-md-tabs { display: flex; align-items: center; gap: 14px; padding: 7px 12px; background: #f6f8fa; border-bottom: 1px solid #d0d7de; font-size: 12.5px; color: #59636e; }
+.gh-md-tabs .active { color: #1f2328; font-weight: 600; background: #fff; border: 1px solid #d0d7de; border-bottom-color: #fff; border-radius: 6px 6px 0 0; padding: 4px 12px; margin: -7px 0 -8px; }
+.gh-md-icons { color: #59636e; font-size: 11.5px; }
+.gh-textarea { padding: 14px 12px 46px; color: #59636e; font-size: 12.5px; }
+.gh-addcomment-foot { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-top: 1px solid #d0d7de; font-size: 11.5px; flex-wrap: wrap; }
+.gh-guidelines { font-size: 11.5px; color: #59636e; margin-top: 10px; }
+.gh-guidelines a { color: #0969da; text-decoration: none; }
+.gh-detail-sidebar { width: 240px; flex-shrink: 0; }
+.gh-side-block { border-bottom: 1px solid #d0d7de; padding: 10px 0; }
+.gh-side-block h4 { font-size: 12.5px; margin: 0 0 7px; display: flex; align-items: center; }
+.gh-side-link { margin-left: auto; color: #0969da; font-weight: 400; font-size: 11.5px; }
+.gh-side-row { display: flex; align-items: center; gap: 7px; font-size: 12.5px; }
+.gh-cop-ico { display: inline-flex; width: 15px; height: 15px; }
+.gh-cop-ico svg { width: 100%; height: 100%; }
+.gh-dev-row { font-size: 12.5px; display: flex; gap: 6px; }
+.gh-subscribe { border: 1px solid #d0d7de; border-radius: 6px; background: #f6f8fa; text-align: center; padding: 5px; font-size: 12.5px; margin-bottom: 6px; }
+.gh-side-links div { font-size: 12.5px; padding: 4px 0; }
+.gh-page-foot { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; padding: 14px 16px; border-top: 1px solid #d0d7de; font-size: 11.5px; color: #59636e; }
+.gh-page-foot a { color: #0969da; text-decoration: none; }
+.gh-octicon.sm { font-size: 14px; }
+
 /* --- folder mock: file table --- */
 .gh-table { margin: 0 16px 16px; border: 1px solid #d0d7de; border-top: none; border-radius: 0 0 6px 6px; }
 .gh-table-head { display: flex; padding: 6px 12px; font-size: 12px; color: #656d76; font-weight: 600; border-bottom: 1px solid #d0d7de; background: #f6f8fa; }
@@ -548,14 +664,15 @@ function pairIn(pairs, a, b) {
 }
 
 const LOCATIONS = [
-  { id: 'repo', label: 'Repository (GitHub)' },
+  { id: 'repo', label: 'Repository' },
+  { id: 'issues', label: 'Repository (Issue)' },
   { id: 'folder', label: 'Folder / Project' },
   { id: 'file', label: 'File' },
 ];
 
 // ---------- state ----------
 let activeLocation = 'repo';
-let chipsByLocation = { repo: [], folder: [], file: [] };
+let chipsByLocation = { repo: [], issues: [], folder: [], file: [] };
 let chipSeq = 1;
 let seq = [];            // ordered parts currently being composed
 let readyChip = null;    // created chip waiting to be dragged onto the board
@@ -1357,6 +1474,194 @@ function mockRepoHTML() {
     </div>
   </div>`;
 }
+// ---------- issue mock data (modelled on the two issue screenshots) ----------
+const ISSUE_META = { owner: 'GeekTrainer', repo: 'agents-in-sdlc', openCount: 3, closedCount: 2, prCount: 1 };
+const ISSUE_LIST = [
+  { n: 6, state: 'open',   title: 'Stretch Goal: Implement pagination on the game list page',
+    meta: 'GeekTrainer opened on Aug 4, 2025', labels: [['enhancement', 'enh'], ['stretch-goal', 'plain']] },
+  { n: 5, state: 'open',   title: 'Update repository coding standards and create comprehensive custom instructions',
+    meta: 'GeekTrainer opened on Aug 4, 2025', labels: [] },
+  { n: 4, state: 'open',   title: 'Add filtering capability for games by category and publisher',
+    meta: 'GeekTrainer opened on Aug 4, 2025', labels: [] },
+  { n: 2, state: 'closed', title: 'Code lacks documentation',
+    meta: 'by GeekTrainer was closed on Aug 4, 2025', labels: [], prs: 1, copilot: true },
+  { n: 1, state: 'closed', title: 'Migrate from Flask backend to .NET 9.0',
+    meta: 'by GeekTrainer was closed on Aug 4, 2025', labels: [] },
+];
+const ISSUE_DETAIL = {
+  n: 2, title: 'Code lacks documentation', state: 'Closed', linkedPr: '#3',
+  author: 'GeekTrainer', opened: 'opened on May 28, 2025',
+  body: "Our organization has a requirement that all functions have docstrings or the language equivalent. " +
+        "Unfortunately, recent updates haven't followed this standard. We need to update the existing code to " +
+        "ensure docstrings (or the equivalent) are included with every function or method.",
+  timeline: [
+    { icon: '👤', html: '<b>GeekTrainer</b> assigned <u>Copilot</u> on May 28, 2025' },
+    { icon: '↗', html: '<b>Copilot</b> mentioned this <u>on May 28, 2025</u>',
+      sub: '<u>Add docstrings to all functions to comply with code standards #3</u>' },
+    { icon: '✓', done: true, html: '<b>GeekTrainer</b> closed this as <u>completed</u> on Aug 4, 2025' },
+  ],
+  prTitle: 'Add docstrings to all functions to comply with code standards',
+};
+
+function ghIssueNavHTML() {
+  return `
+    <div class="gh-globalnav">
+      <span class="gh-burger">☰</span>
+      <span class="gh-octicon">◐</span>
+      <span class="gh-crumb">${escapeHTML(ISSUE_META.owner)} / <span class="gh-forkmark">⑂</span> <b>${escapeHTML(ISSUE_META.repo)}</b> <span class="gh-chev">▾</span></span>
+      <div class="gh-search">Type <kbd>/</kbd> to search</div>
+      <div class="gh-navicons"><span>➕</span><span>◷</span><span>⑃</span><span>▤</span><span>✉</span><span class="gh-avatar"></span></div>
+    </div>
+    <div class="gh-subnav">
+      <span>Code</span>
+      <span class="active">Issues <span class="gh-count">${ISSUE_META.openCount}</span></span>
+      <span>Pull requests <span class="gh-count">${ISSUE_META.prCount}</span></span>
+      <span>Agents</span><span>Actions</span><span>Projects</span><span>Security and quality</span><span>Insights</span>
+    </div>`;
+}
+
+function mockIssueListHTML() {
+  const rows = ISSUE_LIST.map(it => `
+    <div class="gh-issue-row">
+      <span class="iss-ico ${it.state}"></span>
+      <div class="gh-issue-main">
+        <div class="gh-issue-titleline">
+          <span class="gh-issue-title" data-typo-key="issue:${it.n}">${renderTypoText('issue:' + it.n, it.title, null)}</span>
+          ${it.labels.map(([t, k]) => `<span class="gh-label-pill ${k}">${escapeHTML(t)}</span>`).join('')}
+        </div>
+        <div class="gh-issue-meta">#${it.n} · ${escapeHTML(it.meta)}</div>
+      </div>
+      <div class="gh-issue-right">
+        ${it.prs ? `<span class="gh-issue-prs">⑃ ${it.prs}</span>` : ''}
+        ${it.copilot ? `<span class="gh-issue-cop">${MARK_SVG.copilot}</span>` : ''}
+      </div>
+    </div>`).join('');
+
+  return `
+  <div class="gh-repo">
+    ${ghIssueNavHTML()}
+    <div class="gh-issue-layout">
+      <div class="gh-iss-sidebar">
+        <div class="gh-iss-nav active">◉ Issues</div>
+        <div class="gh-iss-nav">👥 Assigned to me</div>
+        <div class="gh-iss-nav">🙂 Created by me</div>
+        <div class="gh-iss-nav">@ Mentioned</div>
+        <div class="gh-iss-nav">◷ Recent activity</div>
+        <hr/>
+        <div class="gh-iss-nav">▤ Views</div>
+        <div class="gh-iss-nav">⊞ Projects</div>
+        <div class="gh-iss-nav">⚑ Milestones</div>
+        <div class="gh-iss-nav">🏷 Labels</div>
+        <hr/>
+        <div class="gh-iss-nav">💬 Feedback <span class="gh-preview-pill">Preview</span></div>
+        <div class="gh-iss-nav">◧ Collapse sidebar</div>
+      </div>
+      <div class="gh-iss-main">
+        <div class="gh-iss-head">
+          <h2>All issues</h2>
+          <span class="gh-btn-primary">New issue</span>
+        </div>
+        <div class="gh-iss-search">is:<span class="gh-sel">issue</span><span class="gh-iss-search-icons">✕ &nbsp; 🔍</span></div>
+        <div class="gh-filter-bar">
+          <span class="gh-filter-tab active">Open <span class="gh-count">${ISSUE_META.openCount}</span></span>
+          <span class="gh-filter-tab">Closed <span class="gh-count">${ISSUE_META.closedCount}</span></span>
+          <span class="gh-spacer"></span>
+          ${['Author','Labels','Projects','Milestones','Assignees'].map(t => `<span class="gh-filter-menu">${t} ▾</span>`).join('')}
+          <span class="gh-filter-menu">⇅ Newest ▾</span>
+        </div>
+        <div class="gh-issue-list">${rows}</div>
+        <div class="gh-iss-foot"><a href="#">Give feedback</a></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function mockIssueDetailHTML() {
+  const d = ISSUE_DETAIL;
+  const timeline = d.timeline.map(t => `
+    <div class="gh-tl-item">
+      <span class="gh-tl-dot ${t.done ? 'done' : ''}">${t.icon}</span>
+      <div class="gh-tl-body">${t.html}${t.sub ? `<div class="gh-tl-sub">⑃ ${t.sub}</div>` : ''}</div>
+    </div>`).join('');
+
+  const side = [
+    ['Assignees', `<div class="gh-side-row"><span class="gh-cop-ico">${MARK_SVG.copilot}</span> Copilot</div>`],
+    ['Labels', '<span class="gh-muted">No labels</span>'],
+    ['Projects', '<span class="gh-muted">No projects</span>'],
+    ['Milestone', '<span class="gh-muted">No milestone</span>'],
+    ['Relationships', '<span class="gh-muted">None yet</span>'],
+    ['Development', `<div class="gh-dev-row">⑃ <b>${escapeHTML(d.prTitle)}</b></div><div class="gh-muted">${escapeHTML(ISSUE_META.owner)}/${escapeHTML(ISSUE_META.repo)}</div>`],
+  ].map(([h, b]) => `<div class="gh-side-block"><h4>${h}</h4>${b}</div>`).join('');
+
+  return `
+  <div class="gh-repo">
+    ${ghIssueNavHTML()}
+    <div class="gh-detail-head">
+      <h1 data-typo-key="issuedetail:title">${renderTypoText('issuedetail:title', d.title, null)} <span class="gh-issue-num">#${d.n}</span></h1>
+      <span class="gh-btn-primary">New issue</span><span class="gh-copyicon">⧉</span>
+    </div>
+    <div class="gh-detail-badges">
+      <span class="gh-state-badge">⊘ ${escapeHTML(d.state)}</span>
+      <span class="gh-linked-pr">⑃ ${escapeHTML(d.linkedPr)}</span>
+    </div>
+    <div class="gh-detail-body">
+      <div class="gh-detail-main">
+        <div class="gh-comment-box">
+          <div class="gh-comment-head">
+            <span class="gh-avatar sm"></span><b>${escapeHTML(d.author)}</b> ${escapeHTML(d.opened)}
+            <span class="gh-spacer"></span><span class="gh-owner-pill">Owner</span><span class="gh-muted">···</span>
+          </div>
+          <div class="gh-comment-text" data-typo-key="issuedetail:body">${renderTypoText('issuedetail:body', d.body, null)}</div>
+          <div class="gh-reactions"><span class="gh-react">🙂</span><span class="gh-react">👀 1</span></div>
+        </div>
+        <div class="gh-timeline">${timeline}</div>
+        <h3 class="gh-addcomment-h">Add a comment</h3>
+        <div class="gh-addcomment">
+          <div class="gh-md-tabs">
+            <span class="active">Write</span><span>Preview</span>
+            <span class="gh-spacer"></span>
+            <span class="gh-md-icons">H &nbsp;<b>B</b>&nbsp; <i>I</i> &nbsp;≡&nbsp; &lt;&gt; &nbsp;🔗&nbsp; | &nbsp;≔&nbsp; ≕ &nbsp;☑&nbsp; | &nbsp;@&nbsp; ⧉ &nbsp;⊡&nbsp; ↩</span>
+          </div>
+          <div class="gh-textarea">Use Markdown to format your comment</div>
+          <div class="gh-addcomment-foot">
+            <span class="gh-muted">📎 Paste, drop, or click to add files</span>
+            <span class="gh-spacer"></span>
+            <span class="gh-btn">⟳ Reopen issue ▾</span>
+            <span class="gh-btn-primary disabled">Comment</span>
+          </div>
+        </div>
+        <div class="gh-guidelines">📖 Please follow this repository's <a href="#">contributing guidelines</a>, <a href="#">security policy</a>, <a href="#">code of conduct</a> and <a href="#">Support</a>.</div>
+      </div>
+      <div class="gh-detail-sidebar">
+        ${side}
+        <div class="gh-side-block">
+          <h4>Notifications <span class="gh-side-link">Customize</span></h4>
+          <div class="gh-subscribe">🔔 Subscribe</div>
+          <div class="gh-muted">You're not receiving notifications from this thread.</div>
+        </div>
+        <div class="gh-side-block"><h4>Participants</h4><span class="gh-avatar sm"></span></div>
+        <div class="gh-side-block gh-side-links">
+          <div>◐ Open in GitHub Copilot app</div>
+          <div>♡ Give feedback</div>
+        </div>
+      </div>
+    </div>
+    <div class="gh-page-foot">
+      <span class="gh-octicon sm">◐</span> © 2026 GitHub, Inc.
+      ${['Terms','Privacy','Security','Status','Community','Docs','Contact','Manage cookies','Do not share my personal information']
+        .map(t => `<a href="#">${t}</a>`).join('')}
+    </div>
+  </div>`;
+}
+
+function mockIssuesHTML() {
+  return `
+    <div class="issue-stack">
+      <div class="issue-shot"><div class="shot-label">issue</div>${mockIssueListHTML()}</div>
+      <div class="issue-shot"><div class="shot-label">issue_commit</div>${mockIssueDetailHTML()}</div>
+    </div>`;
+}
+
 function mockFolderHTML() {
   const rows = folderEntries.map(f => `
     <div class="gh-table-row" data-file="${escapeHTML(f.name)}">
@@ -1434,6 +1739,7 @@ function renderCanvas() {
   const host = document.getElementById('canvasHost');
   let inner = '';
   if (activeLocation === 'repo') inner = mockRepoHTML();
+  else if (activeLocation === 'issues') inner = mockIssuesHTML();
   else if (activeLocation === 'folder') inner = mockFolderHTML();
   else inner = mockFileHTML();
 
