@@ -101,7 +101,14 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .tray-item { position: relative; cursor: grab; }
 .tray-item .chip-remove { display:none; }
 .tray-item:hover .chip-remove { display: flex; }
-.clear-btn { font-size: 11px; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; margin-top: 8px; }
+.clear-btn { font-size: 11px; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; }
+.board-actions { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
+.export-btn {
+  font-size: 12px; font-weight: 600; color: #fff; background: var(--ink); border: none;
+  border-radius: 8px; padding: 7px 13px; cursor: pointer;
+}
+.export-btn:disabled { background: #94a3b8; cursor: wait; }
+.export-note { font-size: 11px; color: var(--muted); }
 
 /* The board is the only interactive region of the page: mark it with a red dotted
    frame so it is obvious where the mockup ends and the real controls begin. */
@@ -540,7 +547,11 @@ body.hotspots .mock .mock-code { outline: 1.5px dotted var(--hot); outline-offse
       <span>everything else in the mockup is a picture, not a control</span>
     </div>
     <div id="canvasHost"></div>
-    <button class="clear-btn" id="clearBtn">Clear this board</button>
+    <div class="board-actions">
+      <button class="export-btn" id="exportBtn">⬇ Export as image</button>
+      <button class="clear-btn" id="clearBtn">Clear this board</button>
+      <span class="export-note" id="exportNote"></span>
+    </div>
   </div>
 </div>
 
@@ -1935,6 +1946,113 @@ function applyHotspots() {
 }
 hotspotToggle.addEventListener('change', applyHotspots);
 applyHotspots();
+
+// ---------- export the board as a clean image ----------
+// Everything that only exists to support editing — the red hotspot overlay, the
+// chip remove buttons, the brush outline, hover-only controls — is stripped from a
+// clone before rendering, so the exported picture shows only the finished design.
+const EDIT_ONLY_SELECTORS = [
+  '.chip-remove', '.seq-del', '.gh-file-del', '.gh-new-tag',
+  '.board-help', '.board-legend', '.board-actions', '.range-badge .chip-remove',
+];
+
+function stripEditingAffordances(node) {
+  node.querySelectorAll(EDIT_ONLY_SELECTORS.join(',')).forEach(el => el.remove());
+  node.classList.remove('brush-on');
+  node.querySelectorAll('.brush-on').forEach(el => el.classList.remove('brush-on'));
+  // these attributes are what the hotspot overlay and the brush hang their styling on
+  node.querySelectorAll('[data-typo-key]').forEach(el => el.removeAttribute('data-typo-key'));
+  node.querySelectorAll('[data-typo-run]').forEach(el => el.removeAttribute('data-typo-run'));
+  node.querySelectorAll('[data-chip-id]').forEach(el => el.removeAttribute('data-chip-id'));
+  node.querySelectorAll('[title]').forEach(el => el.removeAttribute('title'));
+}
+
+// Custom properties live on :root, which does not exist inside the exported SVG,
+// so they are copied onto the wrapper or every var() would resolve to nothing.
+function rootStyleText() {
+  const out = [];
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules;
+    try { rules = sheet.cssRules; } catch (e) { continue; }
+    for (const r of Array.from(rules)) {
+      if (r.selectorText === ':root' && r.style) {
+        for (const prop of Array.from(r.style)) out.push(prop + ':' + r.style.getPropertyValue(prop));
+      }
+    }
+  }
+  return out.join(';');
+}
+
+async function buildBoardPNG(scale) {
+  const mock = document.getElementById('mockActive');
+  if (!mock) throw new Error('nothing to export');
+  const w = Math.ceil(mock.scrollWidth);
+  const h = Math.ceil(mock.scrollHeight);
+
+  const clone = mock.cloneNode(true);
+  stripEditingAffordances(clone);
+
+  const wrapper = document.createElement('div');
+  wrapper.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+  wrapper.style.cssText = rootStyleText() + ';width:' + w + 'px;background:var(--app-bg);';
+  wrapper.appendChild(clone);
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('xmlns', NS);
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', h);
+  svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+  const style = document.createElementNS(NS, 'style');
+  style.textContent = Array.from(document.querySelectorAll('style')).map(x => x.textContent).join('\n');
+  svg.appendChild(style);
+  const fo = document.createElementNS(NS, 'foreignObject');
+  fo.setAttribute('x', 0); fo.setAttribute('y', 0);
+  fo.setAttribute('width', w); fo.setAttribute('height', h);
+  fo.appendChild(wrapper);
+  svg.appendChild(fo);
+
+  const xml = new XMLSerializer().serializeToString(svg);
+  const img = new Image();
+  await new Promise((resolve, reject) => {
+    img.onload = resolve;
+    img.onerror = () => reject(new Error('could not rasterise the board'));
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+  });
+
+  const k = scale || 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = w * k;
+  canvas.height = h * k;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = getComputedStyle(document.body).backgroundColor || '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.setTransform(k, 0, 0, k, 0, 0);
+  ctx.drawImage(img, 0, 0);
+  return { dataUrl: canvas.toDataURL('image/png'), width: w, height: h };
+}
+
+document.getElementById('exportBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('exportBtn');
+  const note = document.getElementById('exportNote');
+  btn.disabled = true;
+  note.textContent = 'rendering…';
+  try {
+    const { dataUrl, width, height } = await buildBoardPNG(2);
+    const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = 'ai-label-' + activeLocation + '-' + stamp + '.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    note.textContent = 'saved ' + width + '×' + height + ' (2×)';
+  } catch (err) {
+    note.textContent = 'export failed: ' + err.message;
+  } finally {
+    btn.disabled = false;
+  }
+});
 
 document.getElementById('clearBtn').addEventListener('click', () => {
   chipsByLocation[activeLocation] = [];
