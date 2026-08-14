@@ -426,11 +426,13 @@ body.hotspots .mock .mock-code { outline: 1.5px dotted var(--hot); outline-offse
 .code-line .tok-num { color: #0550ae; }
 
 /* Typography is painted onto real text as character ranges. */
-.typo-color, .typo-color * { color: #7c3aed !important; }
+.typo-color, .typo-color * { color: var(--tc, #7c3aed) !important; }
 /* Each variant changes exactly one thing, so stacking them is predictable:
    Color recolours, Font changes the typeface, Highlight adds a background. */
 .typo-font { font-style: italic; }
-.typo-highlight { background: #ede9fe; border-radius: 4px; }
+/* !important so the highlight also wins over a chip part that paints its own
+   background, such as the dashed free-text pill defined further down. */
+.typo-highlight { background: var(--th, #ede9fe) !important; border-radius: 4px; }
 [data-typo-run] { cursor: pointer; }
 /* A chip pinned at the end of a painted range: the range carries the typography,
    the badge carries whatever else the chip was built from. */
@@ -466,6 +468,15 @@ body.hotspots .mock .mock-code { outline: 1.5px dotted var(--hot); outline-offse
   background: #f8fafc; cursor: pointer; color: var(--ink);
 }
 .pal-hint { font-size: 10.5px; color: var(--muted); margin: 2px 0 4px 4px; }
+.swatch-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin: 5px 0 2px 4px; }
+.swatch-row .sw-label { font-size: 10px; color: var(--muted); width: 58px; }
+.sw {
+  width: 17px; height: 17px; border-radius: 5px; border: 1px solid rgba(0,0,0,.18);
+  cursor: pointer; padding: 0; flex-shrink: 0;
+}
+.sw.selected { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--visual-typo); }
+.sw-native { width: 24px; height: 19px; padding: 0; border: 1px solid var(--border); border-radius: 5px; cursor: pointer; background: none; }
+.tm-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }
 .vs-chev { margin-left: auto; color: var(--muted); font-size: 10px; }
 .ready-slot { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .ready-slot:empty { display: none; }
@@ -740,7 +751,16 @@ let chipSeq = 1;
 let seq = [];            // ordered parts currently being composed
 let readyChip = null;    // created chip waiting to be dragged onto the board
 let openStyles = {};     // which visual palettes are expanded
-let typoSegments = {};   // targetKey -> [{start, end, variants, badge}] character ranges
+let typoSegments = {};   // targetKey -> [{start, end, mods, badge}] character ranges
+
+// Typography colours. Presets cover the common cases; the native input next to them
+// is a full spectrum picker, so any colour is reachable without a colour library.
+const TYPO_SWATCHES = {
+  color: ['#7c3aed', '#dc2626', '#2563eb', '#059669', '#ea580c', '#111827'],
+  highlight: ['#ede9fe', '#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8', '#e5e7eb'],
+};
+let typoColors = { color: '#7c3aed', highlight: '#ede9fe' };
+function defaultTypoColor(variant) { return typoColors[variant]; }
 
 function fileIcon(name) {
   const n = name.toLowerCase();
@@ -938,15 +958,13 @@ function kotlinTokenClasses(code) {
 function partHTML(p, idx, mods) {
   const ai = `data-part-idx="${idx}"`;
   const mods2 = mods || [];
-  const mc = mods2.map(v => 'typo-' + v).join(' ');
-  const mt = mods2.length
-    ? ` title="Typography: ${mods2.map(v => variantOf('typography', v).text).join(' + ')}"`
-    : '';
+  const ta = typoAttrs(mods2);
+  const mt = mods2.length ? ` title="Typography: ${typoTitle(mods2)}"` : '';
   if (p.kind === 'text') {
-    return `<span class="chip-text ${mc}"${mt}>${escapeHTML(labelById[p.id].text)}</span>`;
+    return `<span class="chip-text ${ta.cls}"${ta.style}${mt}>${escapeHTML(labelById[p.id].text)}</span>`;
   }
   if (p.kind === 'free') {
-    return `<span class="chip-free ${mc}"${mt}>${escapeHTML(p.text)}</span>`;
+    return `<span class="chip-free ${ta.cls}"${ta.style}${mt}>${escapeHTML(p.text)}</span>`;
   }
   if (p.kind === 'icon') {
     const v = variantOf('icon', p.variant);
@@ -957,7 +975,10 @@ function partHTML(p, idx, mods) {
   if (p.kind === 'typo') {
     const v = variantOf('typography', p.variant);
     const short = v.text.replace(' style', '');
-    return `<span class="typo-marker tm-${p.variant}" title="Typography: ${v.text} — applies to the text after it">(${escapeHTML(short)})</span>`;
+    const dot = p.color ? `<span class="tm-dot" style="background:${p.color}"></span>` : '';
+    const tint = p.variant === 'color' && p.color ? ` style="color:${p.color}"`
+               : p.variant === 'highlight' && p.color ? ` style="background:${p.color}"` : '';
+    return `<span class="typo-marker tm-${p.variant}"${tint} title="Typography: ${v.text}${p.color ? ' ' + p.color : ''} — applies to the text after it">${dot}(${escapeHTML(short)})</span>`;
   }
   // percentage
   const pct = p.pct || 70;
@@ -976,8 +997,25 @@ function partHTML(p, idx, mods) {
 // everything else separated by a dot.
 function precedingTypo(parts, i) {
   const mods = [];
-  for (let j = i - 1; j >= 0 && parts[j].kind === 'typo'; j--) mods.unshift(parts[j].variant);
+  for (let j = i - 1; j >= 0 && parts[j].kind === 'typo'; j--) mods.unshift({ variant: parts[j].variant, color: parts[j].color });
   return mods;
+}
+
+// Turns a list of {variant, color} into the class list and the custom properties
+// that carry the chosen colours down to nested syntax-token spans.
+function typoAttrs(mods) {
+  if (!mods || !mods.length) return { cls: '', style: '' };
+  const cls = mods.map(m => 'typo-' + m.variant).join(' ');
+  const vars = [];
+  mods.forEach(m => {
+    if (m.variant === 'color' && m.color) vars.push('--tc:' + m.color);
+    if (m.variant === 'highlight' && m.color) vars.push('--th:' + m.color);
+  });
+  return { cls, style: vars.length ? ` style="${vars.join(';')}"` : '' };
+}
+
+function typoTitle(mods) {
+  return mods.map(m => variantOf('typography', m.variant).text + (m.color ? ' ' + m.color : '')).join(' + ');
 }
 
 function chipPartsHTML(parts, opts) {
@@ -1043,6 +1081,11 @@ document.addEventListener('click', (e) => {
 function textPartIds() { return seq.filter(p => p.kind === 'text').map(p => p.id); }
 function typoParts() { return seq.filter(p => p.kind === 'typo'); }
 function armedTypoVariants() { return [...new Set(typoParts().map(p => p.variant))]; }
+function armedTypoMods() {
+  const seen = new Set();
+  return typoParts().filter(p => !seen.has(p.variant) && seen.add(p.variant))
+                    .map(p => ({ variant: p.variant, color: p.color }));
+}
 function nonTypoParts() { return seq.filter(p => p.kind !== 'typo'); }
 
 // Only textual-to-textual pairing is constrained, to the vetted list from the
@@ -1132,9 +1175,21 @@ function renderVisualPanel() {
     let pal = '';
     if (open && style.id === 'icon') pal = iconPaletteHTML(style);
     else if (open && style.id === 'typography') {
+      const swatches = (variant, label) => `
+        <div class="swatch-row">
+          <span class="sw-label">${label}</span>
+          ${TYPO_SWATCHES[variant].map(c => `
+            <button class="sw ${typoColors[variant] === c ? 'selected' : ''}" style="background:${c}"
+                    data-sw-variant="${variant}" data-sw-color="${c}" title="${c}"></button>`).join('')}
+          <input type="color" class="sw-native" data-sw-variant="${variant}"
+                 value="${typoColors[variant]}" title="Pick any colour" />
+        </div>`;
       pal = `<div class="variant-strip">` + style.variants.map(v =>
         `<span class="variant-chip" data-add-style="typography" data-variant="${v.id}">${v.text}</span>`
-      ).join('') + `</div><div class="pal-hint">Adds a marker that styles the text part after it. Stack several for a combined effect.</div>`;
+      ).join('') + `</div>
+      ${swatches('color', 'Text')}
+      ${swatches('highlight', 'Highlight')}
+      <div class="pal-hint">Adds a marker that styles the text part after it. Stack several for a combined effect.</div>`;
     } else if (open) {
       pal = `<div class="variant-strip">` + style.variants.map(v =>
         `<span class="variant-chip" data-add-style="${style.id}" data-variant="${v.id}">${v.text}</span>`
@@ -1165,8 +1220,31 @@ function renderVisualPanel() {
       const style = el.dataset.addStyle;
       const variant = el.dataset.variant;
       addPart(style === 'icon' ? { kind: 'icon', variant }
-        : style === 'typography' ? { kind: 'typo', variant }
+        : style === 'typography' ? { kind: 'typo', variant, color: defaultTypoColor(variant) }
         : { kind: 'pct', variant, pct: 70 });
+    });
+  });
+
+  // Choosing a colour sets the default for new markers and retints any marker of
+  // that variant already in the sequence, so the preview updates as you pick.
+  function applyTypoColor(variant, color) {
+    typoColors[variant] = color;
+    seq.forEach(x => { if (x.kind === 'typo' && x.variant === variant) x.color = color; });
+    renderVisualPanel();
+    updateComposer();
+    renderCanvas();
+  }
+  body.querySelectorAll('[data-sw-color]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      applyTypoColor(el.dataset.swVariant, el.dataset.swColor);
+    });
+  });
+  body.querySelectorAll('input.sw-native').forEach(el => {
+    el.addEventListener('click', (e) => e.stopPropagation());
+    el.addEventListener('input', (e) => {
+      e.stopPropagation();
+      applyTypoColor(el.dataset.swVariant, el.value);
     });
   });
 }
@@ -1209,7 +1287,7 @@ function updateComposer() {
 
   const armed = armedTypoVariants();
   if (armed.length) {
-    const names = armed.map(v => variantOf('typography', v).text).join(' + ');
+    const names = typoTitle(armedTypoMods());
     const extra = nonTypoParts().length;
     note.innerHTML = `<div class="brush-note">
       <b>Typography armed: ${escapeHTML(names)}</b><br/>
@@ -1316,10 +1394,10 @@ function renderTypoText(key, text, tokenClasses) {
     let j = i + 1;
     while (j < text.length && per[j] === sg) j++;
     const inner = tokenRunsHTML(text, tokenClasses, i, j);
-    html += sg
-      ? `<span class="${sg.variants.map(v => 'typo-' + v).join(' ')}" data-typo-run="${i}"` +
-        ` title="Typography: ${sg.variants.map(v => variantOf('typography', v).text).join(' + ')}">${inner}</span>`
-      : inner;
+    if (sg) {
+      const ta = typoAttrs(sg.mods);
+      html += `<span class="${ta.cls}" data-typo-run="${i}"${ta.style} title="Typography: ${typoTitle(sg.mods)}">${inner}</span>`;
+    } else html += inner;
     if (endsAt[j]) html += endsAt[j].map(x => `<span class="range-badge">${chipHTML({ parts: x.badge })}</span>`).join('');
     i = j;
   }
@@ -1410,8 +1488,8 @@ function charIndexIn(el, node, offset) {
 
 // Turns the current text selection into typography ranges on every text element it touches.
 function paintSelectionWithBrush() {
-  const variants = armedTypoVariants();
-  if (!variants.length) return false;
+  const mods = armedTypoMods();
+  if (!mods.length) return false;
   const badge = nonTypoParts().map(x => JSON.parse(JSON.stringify(x)));
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return false;
@@ -1436,7 +1514,7 @@ function paintSelectionWithBrush() {
     if (end <= start) return;
 
     const key = el.dataset.typoKey;
-    (typoSegments[key] = typoSegments[key] || []).push({ start, end, variants, badge });
+    (typoSegments[key] = typoSegments[key] || []).push({ start, end, mods, badge });
     painted = true;
   });
 
