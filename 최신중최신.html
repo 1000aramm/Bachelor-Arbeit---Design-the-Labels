@@ -188,6 +188,9 @@ body.hotspots .mock .mock-code { outline: 1.5px dotted var(--hot); outline-offse
   border: 1px solid #94a3b8; overflow: hidden;
 }
 .chip-pct .bar-fill { display: block; height: 100%; background: #047857; }
+/* The score bar carries no text, so a Color marker in front of it repaints the
+   filled portion rather than having no visible effect. */
+.chip-pct.typo-color .bar-fill { background: var(--tc, #047857) !important; }
 
 .placed-chip { position: absolute; touch-action: none; cursor: grab; z-index: 5; display: inline-flex; align-items: center; }
 .chip-remove {
@@ -982,14 +985,15 @@ function partHTML(p, idx, mods) {
   }
   // percentage
   const pct = p.pct || 70;
+  const pcls = ('chip-pct ' + ta.cls).trim();
   if (p.variant === 'bar') {
-    return `<span class="chip-pct" ${ai} data-pctvariant="bar" data-pct="${pct}">
+    return `<span class="${pcls}" ${ai}${ta.style}${mt} data-pctvariant="bar" data-pct="${pct}">
       <span class="bar-track"><span class="bar-fill" style="width:${pct}%"></span></span></span>`;
   }
   if (p.variant === 'split') {
-    return `<span class="chip-pct" ${ai} data-pctvariant="split" data-pct="${pct}"><span class="pct-label">Human ${100-pct}% · AI ${pct}%</span></span>`;
+    return `<span class="${pcls}" ${ai}${ta.style}${mt} data-pctvariant="split" data-pct="${pct}"><span class="pct-label">Human ${100-pct}% · AI ${pct}%</span></span>`;
   }
-  return `<span class="chip-pct" ${ai} data-pctvariant="simple" data-pct="${pct}"><span class="pct-label">${pct}%</span></span>`;
+  return `<span class="${pcls}" ${ai}${ta.style}${mt} data-pctvariant="simple" data-pct="${pct}"><span class="pct-label">${pct}%</span></span>`;
 }
 
 // Typography parts modify the text part that follows them, so a chip reads as
@@ -1027,12 +1031,13 @@ function chipPartsHTML(parts, opts) {
     const p = parts[i];
     // In a finished chip the marker itself is not drawn — it only styles its text.
     if (p.kind === 'typo' && !showMarkers) continue;
-    const isText = p.kind === 'text' || p.kind === 'free';
+    // Text, free text and percentages all take the typography in front of them.
+    const styleable = p.kind === 'text' || p.kind === 'free' || p.kind === 'pct';
     if (prev) {
-      const glued = prev.kind === 'typo' && (isText || p.kind === 'typo');
+      const glued = prev.kind === 'typo' && (styleable || p.kind === 'typo');
       if (!glued) html += '<span class="chip-sep">·</span>';
     }
-    const inner = partHTML(p, i, isText ? precedingTypo(parts, i) : []);
+    const inner = partHTML(p, i, styleable ? precedingTypo(parts, i) : []);
     html += withDelete
       ? `<span class="seq-part">${inner}<button class="seq-del" data-del="${i}" title="Remove">✕</button></span>`
       : inner;
