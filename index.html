@@ -775,14 +775,14 @@ function fileIcon(name) {
 
 // ---------- repo mock data (modelled on a real repo screenshot) ----------
 const REPO_META = {
-  owner: '1000aramm', name: 'Sopra', visibility: 'Public',
+  owner: 'username_ex01', name: 'Sopra', visibility: 'Public',
   description: 'Software development',
   branch: 'main', branches: 1, tags: 0,
   stars: 0, watching: 0, forks: 0,
   lastCommitMsg: 'Delete Faraway', lastCommitHash: '2d081fc', lastCommitTime: '5 months ago', commits: 3,
   language: 'Kotlin',
   readmeTitle: 'SoPra Projekt 2', readmeSub: 'Wichtige Links',
-  contributors: ['1000aramm', 'happzday1'],
+  contributors: ['username_ex01', 'username_ex02'],
   readmeLinks: [
     ['Aktuelle Informationen zu diesem SoPra', 'https://sopra.cs.tu-dortmund.de/wiki/sopra/25D/start'],
     ['Beispielprojekt Kartenspiel War', 'https://sopra-gitlab.cs.tu-dortmund.de/internal/bgw-war'],
@@ -820,7 +820,7 @@ let addFileComposerOpen = false;
 // ---------- folder mock data (modelled on a real src/main/kotlin screenshot) ----------
 const FOLDER_META = {
   branch: 'main', crumbs: ['Sopra', 'src', 'main', 'kotlin'],
-  committer: 'happzday1', commitMsg: 'Initial commit', hash: 'ee3bf8a', time: '5 months ago',
+  committer: 'username_ex01', commitMsg: 'Initial commit', hash: 'ee3bf8a', time: '5 months ago',
 };
 const folderEntries = [
   { name: '..', dir: true, parent: true },
@@ -833,7 +833,7 @@ const folderEntries = [
 // ---------- file mock data (real PlayerService.kt, comments stripped) ----------
 const FILE_META = {
   branch: 'main', crumbs: ['Sopra', 'src', 'main', 'kotlin', 'service'], fileName: 'PlayerService.kt',
-  committer: 'happzday1', commitMsg: 'Initial commit', hash: 'ee3bf8a', time: '5 months ago',
+  committer: 'username_ex01', commitMsg: 'Initial commit', hash: 'ee3bf8a', time: '5 months ago',
   lines: 79, loc: 60, size: '3.11 KB',
 };
 const FILE_CODE = [
@@ -1677,30 +1677,30 @@ function mockRepoHTML() {
   </div>`;
 }
 // ---------- issue mock data (modelled on the two issue screenshots) ----------
-const ISSUE_META = { owner: 'GeekTrainer', repo: 'agents-in-sdlc', openCount: 3, closedCount: 2, prCount: 1 };
+const ISSUE_META = { owner: 'username_ex01', repo: 'agents-in-sdlc', openCount: 3, closedCount: 2, prCount: 1 };
 const ISSUE_LIST = [
   { n: 6, state: 'open',   title: 'Stretch Goal: Implement pagination on the game list page',
-    meta: 'GeekTrainer opened on Aug 4, 2025', labels: [['enhancement', 'enh'], ['stretch-goal', 'plain']] },
+    meta: 'username_ex01 opened on Aug 4, 2025', labels: [['enhancement', 'enh'], ['stretch-goal', 'plain']] },
   { n: 5, state: 'open',   title: 'Update repository coding standards and create comprehensive custom instructions',
-    meta: 'GeekTrainer opened on Aug 4, 2025', labels: [] },
+    meta: 'username_ex01 opened on Aug 4, 2025', labels: [] },
   { n: 4, state: 'open',   title: 'Add filtering capability for games by category and publisher',
-    meta: 'GeekTrainer opened on Aug 4, 2025', labels: [] },
+    meta: 'username_ex01 opened on Aug 4, 2025', labels: [] },
   { n: 2, state: 'closed', title: 'Code lacks documentation',
-    meta: 'by GeekTrainer was closed on Aug 4, 2025', labels: [], prs: 1, copilot: true },
+    meta: 'by username_ex01 was closed on Aug 4, 2025', labels: [], prs: 1, copilot: true },
   { n: 1, state: 'closed', title: 'Migrate from Flask backend to .NET 9.0',
-    meta: 'by GeekTrainer was closed on Aug 4, 2025', labels: [] },
+    meta: 'by username_ex01 was closed on Aug 4, 2025', labels: [] },
 ];
 const ISSUE_DETAIL = {
   n: 2, title: 'Code lacks documentation', state: 'Closed', linkedPr: '#3',
-  author: 'GeekTrainer', opened: 'opened on May 28, 2025',
+  author: 'username_ex01', opened: 'opened on May 28, 2025',
   body: "Our organization has a requirement that all functions have docstrings or the language equivalent. " +
         "Unfortunately, recent updates haven't followed this standard. We need to update the existing code to " +
         "ensure docstrings (or the equivalent) are included with every function or method.",
   timeline: [
-    { icon: '👤', html: '<b>GeekTrainer</b> assigned <u>Copilot</u> on May 28, 2025' },
+    { icon: '👤', html: '<b>username_ex01</b> assigned <u>Copilot</u> on May 28, 2025' },
     { icon: '↗', html: '<b>Copilot</b> mentioned this <u>on May 28, 2025</u>',
       sub: '<u>Add docstrings to all functions to comply with code standards #3</u>' },
-    { icon: '✓', done: true, html: '<b>GeekTrainer</b> closed this as <u>completed</u> on Aug 4, 2025' },
+    { icon: '✓', done: true, html: '<b>username_ex01</b> closed this as <u>completed</u> on Aug 4, 2025' },
   ],
   prTitle: 'Add docstrings to all functions to comply with code standards',
 };
