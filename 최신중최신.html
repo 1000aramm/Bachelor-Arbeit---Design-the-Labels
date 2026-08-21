@@ -429,25 +429,24 @@ body.hotspots .mock .mock-code { outline: 1.5px dotted var(--hot); outline-offse
 .code-line .tok-num { color: #0550ae; }
 
 /* Typography is painted onto real text as character ranges. */
-.typo-color, .typo-color * { color: var(--tc, #7c3aed) !important; }
 /* Each variant changes exactly one thing, so stacking them is predictable:
-   Color recolours, Font changes the typeface, Highlight adds a background,
-   Circle draws a ring around it. */
+   Font changes the typeface, Highlight adds a background, Badge turns the part
+   into a GitHub-style label pill, Color recolours the text. */
 .typo-font { font-style: italic; }
-/* An outline rather than a border: it is drawn outside the box, so circling a
-   filename or a range of code does not push the surrounding text around. */
-.typo-circle {
-  outline: 1.6px solid var(--tcir, #dc2626);
-  outline-offset: 2.5px;
-  border-radius: 999px;
-}
-/* Several targets clip their content to keep a column aligned (the filename and
-   commit-message cells). An outline is painted outside the box, so it would be cut
-   off there — let a target show it once it actually holds a ring. */
-[data-typo-key]:has(.typo-circle) { overflow: visible; }
-/* !important so the highlight also wins over a chip part that paints its own
-   background, such as the dashed free-text pill defined further down. */
 .typo-highlight { background: var(--th, #ede9fe) !important; border-radius: 4px; }
+/* The GitHub issue-label look: a filled pill carrying its own readable text colour. */
+.typo-badge {
+  background: var(--tbg, #a2eeef) !important;
+  color: var(--tfg, #04413b) !important;
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-weight: 500;
+}
+/* Last on purpose: picking Color as well must beat the pill's automatic text colour. */
+.typo-color, .typo-color * { color: var(--tc, #7c3aed) !important; }
+/* A badge is wider than the bare text, and some targets clip their content to keep
+   a column aligned, so let those show it once they actually hold one. */
+[data-typo-key]:has(.typo-badge) { overflow: visible; }
 [data-typo-run] { cursor: pointer; }
 /* A chip pinned at the end of a painted range: the range carries the typography,
    the badge carries whatever else the chip was built from. */
@@ -733,7 +732,7 @@ const VISUAL_STYLES = [
     { id: 'color', text: 'Color' },
     { id: 'font', text: 'Font' },
     { id: 'highlight', text: 'Highlight style' },
-    { id: 'circle', text: 'Circle' },
+    { id: 'badge', text: 'Badge' },
   ]},
   { id: 'percentage', text: 'Percentage / AI score', color: '#047857', variants: [
     { id: 'simple', text: 'Simple % badge' },
@@ -774,9 +773,22 @@ let typoSegments = {};   // targetKey -> [{start, end, mods, badge}] character r
 const TYPO_SWATCHES = {
   color: ['#7c3aed', '#dc2626', '#2563eb', '#059669', '#ea580c', '#111827'],
   highlight: ['#ede9fe', '#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8', '#e5e7eb'],
-  circle: ['#dc2626', '#ea580c', '#2563eb', '#059669', '#7c3aed', '#111827'],
+  badge: ['#a2eeef', '#fef2c0', '#c2e0c6', '#c5def5', '#d73a4a', '#7057ff'],
 };
-let typoColors = { color: '#7c3aed', highlight: '#ede9fe', circle: '#dc2626' };
+let typoColors = { color: '#7c3aed', highlight: '#ede9fe', badge: '#a2eeef' };
+
+// A badge picks its own text colour from the chosen background: a dark tint of it
+// when the background is light, white when it is dark. That keeps every colour in
+// the spectrum picker readable without the author having to choose two colours.
+function badgeTextColor(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+  if (!m) return '#04413b';
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  if ((0.299 * r + 0.587 * g + 0.114 * b) / 255 <= 0.6) return '#ffffff';
+  const dark = c => Math.round(c * 0.28).toString(16).padStart(2, '0');
+  return '#' + dark(r) + dark(g) + dark(b);
+}
 function defaultTypoColor(variant) { return typoColors[variant]; }
 
 function fileIcon(name) {
@@ -995,7 +1007,8 @@ function partHTML(p, idx, mods) {
     const dot = p.color ? `<span class="tm-dot" style="background:${p.color}"></span>` : '';
     const tint = p.variant === 'color' && p.color ? ` style="color:${p.color}"`
                : p.variant === 'highlight' && p.color ? ` style="background:${p.color}"`
-               : p.variant === 'circle' && p.color ? ` style="color:${p.color};box-shadow:0 0 0 1.3px ${p.color}"` : '';
+               : p.variant === 'badge' && p.color
+                 ? ` style="background:${p.color};color:${badgeTextColor(p.color)};border-radius:999px;padding:0 7px"` : '';
     return `<span class="typo-marker tm-${p.variant}"${tint} title="Typography: ${v.text}${p.color ? ' ' + p.color : ''} — applies to the text after it">${dot}(${escapeHTML(short)})</span>`;
   }
   // percentage
@@ -1029,7 +1042,10 @@ function typoAttrs(mods) {
   mods.forEach(m => {
     if (m.variant === 'color' && m.color) vars.push('--tc:' + m.color);
     if (m.variant === 'highlight' && m.color) vars.push('--th:' + m.color);
-    if (m.variant === 'circle' && m.color) vars.push('--tcir:' + m.color);
+    if (m.variant === 'badge' && m.color) {
+      vars.push('--tbg:' + m.color);
+      vars.push('--tfg:' + badgeTextColor(m.color));
+    }
   });
   return { cls, style: vars.length ? ` style="${vars.join(';')}"` : '' };
 }
@@ -1210,7 +1226,7 @@ function renderVisualPanel() {
       ).join('') + `</div>
       ${swatches('color', 'Text')}
       ${swatches('highlight', 'Highlight')}
-      ${swatches('circle', 'Circle')}
+      ${swatches('badge', 'Badge')}
       <div class="pal-hint">Adds a marker that styles the text part after it. Stack several for a combined effect.</div>`;
     } else if (open) {
       pal = `<div class="variant-strip">` + style.variants.map(v =>
@@ -1247,14 +1263,14 @@ function renderVisualPanel() {
     });
   });
 
-  // Choosing a colour sets the default for new markers and retints any marker of
-  // that variant already in the sequence, so the preview updates as you pick.
+  // Choosing a colour sets the default for the *next* marker only. It must not
+  // reach back into markers already placed: a chip is built by picking a colour and
+  // then adding the marker, so retinting would recolour the previous one and make it
+  // impossible to hold two differently coloured badges in one chip — which is
+  // exactly what a GitHub issue row shows.
   function applyTypoColor(variant, color) {
     typoColors[variant] = color;
-    seq.forEach(x => { if (x.kind === 'typo' && x.variant === variant) x.color = color; });
     renderVisualPanel();
-    updateComposer();
-    renderCanvas();
   }
   body.querySelectorAll('[data-sw-color]').forEach(el => {
     el.addEventListener('click', (e) => {
