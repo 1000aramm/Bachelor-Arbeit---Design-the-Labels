@@ -431,8 +431,20 @@ body.hotspots .mock .mock-code { outline: 1.5px dotted var(--hot); outline-offse
 /* Typography is painted onto real text as character ranges. */
 .typo-color, .typo-color * { color: var(--tc, #7c3aed) !important; }
 /* Each variant changes exactly one thing, so stacking them is predictable:
-   Color recolours, Font changes the typeface, Highlight adds a background. */
+   Color recolours, Font changes the typeface, Highlight adds a background,
+   Circle draws a ring around it. */
 .typo-font { font-style: italic; }
+/* An outline rather than a border: it is drawn outside the box, so circling a
+   filename or a range of code does not push the surrounding text around. */
+.typo-circle {
+  outline: 1.6px solid var(--tcir, #dc2626);
+  outline-offset: 2.5px;
+  border-radius: 999px;
+}
+/* Several targets clip their content to keep a column aligned (the filename and
+   commit-message cells). An outline is painted outside the box, so it would be cut
+   off there — let a target show it once it actually holds a ring. */
+[data-typo-key]:has(.typo-circle) { overflow: visible; }
 /* !important so the highlight also wins over a chip part that paints its own
    background, such as the dashed free-text pill defined further down. */
 .typo-highlight { background: var(--th, #ede9fe) !important; border-radius: 4px; }
@@ -721,6 +733,7 @@ const VISUAL_STYLES = [
     { id: 'color', text: 'Color' },
     { id: 'font', text: 'Font' },
     { id: 'highlight', text: 'Highlight style' },
+    { id: 'circle', text: 'Circle' },
   ]},
   { id: 'percentage', text: 'Percentage / AI score', color: '#047857', variants: [
     { id: 'simple', text: 'Simple % badge' },
@@ -761,8 +774,9 @@ let typoSegments = {};   // targetKey -> [{start, end, mods, badge}] character r
 const TYPO_SWATCHES = {
   color: ['#7c3aed', '#dc2626', '#2563eb', '#059669', '#ea580c', '#111827'],
   highlight: ['#ede9fe', '#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8', '#e5e7eb'],
+  circle: ['#dc2626', '#ea580c', '#2563eb', '#059669', '#7c3aed', '#111827'],
 };
-let typoColors = { color: '#7c3aed', highlight: '#ede9fe' };
+let typoColors = { color: '#7c3aed', highlight: '#ede9fe', circle: '#dc2626' };
 function defaultTypoColor(variant) { return typoColors[variant]; }
 
 function fileIcon(name) {
@@ -980,7 +994,8 @@ function partHTML(p, idx, mods) {
     const short = v.text.replace(' style', '');
     const dot = p.color ? `<span class="tm-dot" style="background:${p.color}"></span>` : '';
     const tint = p.variant === 'color' && p.color ? ` style="color:${p.color}"`
-               : p.variant === 'highlight' && p.color ? ` style="background:${p.color}"` : '';
+               : p.variant === 'highlight' && p.color ? ` style="background:${p.color}"`
+               : p.variant === 'circle' && p.color ? ` style="color:${p.color};box-shadow:0 0 0 1.3px ${p.color}"` : '';
     return `<span class="typo-marker tm-${p.variant}"${tint} title="Typography: ${v.text}${p.color ? ' ' + p.color : ''} — applies to the text after it">${dot}(${escapeHTML(short)})</span>`;
   }
   // percentage
@@ -1014,6 +1029,7 @@ function typoAttrs(mods) {
   mods.forEach(m => {
     if (m.variant === 'color' && m.color) vars.push('--tc:' + m.color);
     if (m.variant === 'highlight' && m.color) vars.push('--th:' + m.color);
+    if (m.variant === 'circle' && m.color) vars.push('--tcir:' + m.color);
   });
   return { cls, style: vars.length ? ` style="${vars.join(';')}"` : '' };
 }
@@ -1194,6 +1210,7 @@ function renderVisualPanel() {
       ).join('') + `</div>
       ${swatches('color', 'Text')}
       ${swatches('highlight', 'Highlight')}
+      ${swatches('circle', 'Circle')}
       <div class="pal-hint">Adds a marker that styles the text part after it. Stack several for a combined effect.</div>`;
     } else if (open) {
       pal = `<div class="variant-strip">` + style.variants.map(v =>
