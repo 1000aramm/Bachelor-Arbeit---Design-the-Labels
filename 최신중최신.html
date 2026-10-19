@@ -72,6 +72,19 @@ header.topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 }
 .variant-chip.selected { color: #fff; border-color: transparent; }
 
+/* Ready-made labels: icon and wording already paired in one pill. */
+.viz-section { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 9px; }
+.viz-section h5 { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 7px; }
+.viz-list { display: flex; flex-direction: column; gap: 5px; }
+.viz-btn { border: none; background: none; padding: 0; cursor: pointer; text-align: left; }
+.chip-viz {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #999999; color: #000000;
+  border-radius: 999px; padding: 3px 12px; font-size: 12px; font-weight: 500; white-space: nowrap;
+}
+.chip-viz .viz-ico { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; font-size: 13px; line-height: 1; flex-shrink: 0; }
+.chip-viz .viz-ico svg { width: 100%; height: 100%; display: block; }
+
 /* Icon picker: grouped Human / Robot / Marks menus, glyph-only select targets */
 .variant-group { margin: 6px 0 2px 4px; }
 .variant-group h6 {
@@ -777,6 +790,35 @@ const TYPO_SWATCHES = {
 };
 let typoColors = { color: '#7c3aed', highlight: '#ede9fe', badge: '#a2eeef' };
 
+// Ready-made labels: an icon and its wording already paired, drawn as one pill.
+const VIZ_BG = '#999999';
+const VIZ_FG = '#000000';
+const VIZ_PRESETS = [
+  { id: 'v-complete',   glyph: '\u{1F916}', text: 'complete AI use' },
+  { id: 'v-no-ai',      glyph: '\u{1F916}', text: 'No-AI' },
+  { id: 'v-ai-led',     glyph: '\u{1F916}', text: 'AI-led' },
+  { id: 'v-human-led',  glyph: '\u{1F464}', text: 'human-led' },
+  { id: 'v-ai-dev',     glyph: '\u{1F916}', text: 'AI-developed' },
+  { id: 'v-human-dev',  glyph: '\u{1F464}', text: 'human-developed' },
+  { id: 'v-ai-asst',    glyph: '\u{1F916}', text: 'AI-assisted' },
+  { id: 'v-human-asst', glyph: '\u{1F464}', text: 'human-assisted' },
+  { id: 'v-ai-gen',     glyph: '\u{1F916}', text: 'AI-generated' },
+  { id: 'v-human-rev',  glyph: '\u{1F464}', text: 'human-reviewed' },
+  { id: 'v-vibe',       glyph: '\u{1F916}', text: 'Vibe-coded' },
+  { id: 'v-partial',    glyph: '\u{1F916}', text: 'partial AI use' },
+  { id: 'v-vibe-cop',   mark: 'copilot',     text: 'Vibe-coded' },
+  { id: 'v-vibe-claude', mark: 'logo',       text: 'Vibe-coded' },
+  { id: 'v-vibe-gpt',   mark: 'chatgpt',     text: 'Vibe-coded' },
+  { id: 'v-vibe-spark', glyph: '\u{2726}',  text: 'Vibe-coded' },
+];
+const vizById = Object.fromEntries(VIZ_PRESETS.map(v => [v.id, v]));
+
+function vizPillHTML(v, extraCls, extraStyle) {
+  const ico = v.mark ? MARK_SVG[v.mark] : escapeHTML(v.glyph);
+  return `<span class="chip-viz ${extraCls || ''}"${extraStyle || ''}>` +
+         `<span class="viz-ico">${ico}</span>${escapeHTML(v.text)}</span>`;
+}
+
 // A badge picks its own text colour from the chosen background: a dark tint of it
 // when the background is light, white when it is dark. That keeps every colour in
 // the spectrum picker readable without the author having to choose two colours.
@@ -995,6 +1037,9 @@ function partHTML(p, idx, mods) {
   if (p.kind === 'free') {
     return `<span class="chip-free ${ta.cls}"${ta.style}${mt}>${escapeHTML(p.text)}</span>`;
   }
+  if (p.kind === 'viz') {
+    return vizPillHTML(vizById[p.id], ta.cls, ta.style + mt);
+  }
   if (p.kind === 'icon') {
     const v = variantOf('icon', p.variant);
     return v.mark
@@ -1064,7 +1109,7 @@ function chipPartsHTML(parts, opts) {
     // In a finished chip the marker itself is not drawn — it only styles its text.
     if (p.kind === 'typo' && !showMarkers) continue;
     // Text, free text and percentages all take the typography in front of them.
-    const styleable = p.kind === 'text' || p.kind === 'free' || p.kind === 'pct';
+    const styleable = p.kind === 'text' || p.kind === 'free' || p.kind === 'pct' || p.kind === 'viz';
     if (prev) {
       const glued = prev.kind === 'typo' && (styleable || p.kind === 'typo');
       if (!glued) html += '<span class="chip-sep">·</span>';
@@ -1172,6 +1217,12 @@ function renderLabelsPanel() {
     <div class="label-cols">
       ${col(ai, 'ai', 'AI part')}
       ${col(human, 'human', 'Human part')}
+    </div>
+    <div class="viz-section">
+      <h5>Visualize</h5>
+      <div class="viz-list">
+        ${VIZ_PRESETS.map(v => `<button class="viz-btn" data-viz="${v.id}">${vizPillHTML(v)}</button>`).join('')}
+      </div>
     </div>`;
 
   body.querySelectorAll('.label-btn').forEach(btn => {
@@ -1181,6 +1232,10 @@ function renderLabelsPanel() {
       if (at !== -1) removePart(at);
       else if (canAddText(id)) addPart({ kind: 'text', id });
     });
+  });
+
+  body.querySelectorAll('.viz-btn').forEach(btn => {
+    btn.addEventListener('click', () => addPart({ kind: 'viz', id: btn.dataset.viz }));
   });
 }
 
@@ -2067,6 +2122,12 @@ applyHotspots();
 // Everything that only exists to support editing — the red hotspot overlay, the
 // chip remove buttons, the brush outline, hover-only controls — is stripped from a
 // clone before rendering, so the exported picture shows only the finished design.
+// Output pixel sizes for the locations that are exported at a fixed frame.
+const EXPORT_FRAMES = {
+  repo: { w: 2074, h: 740 },
+  file: { w: 2074, h: 720 },
+};
+
 const EDIT_ONLY_SELECTORS = [
   '.chip-remove', '.seq-del', '.gh-file-del', '.gh-new-tag',
   '.board-help', '.board-legend', '.board-actions', '.range-badge .chip-remove',
@@ -2141,11 +2202,27 @@ async function buildBoardPNG(scale) {
   canvas.width = w * k;
   canvas.height = h * k;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = getComputedStyle(document.body).backgroundColor || '#fff';
+  const paper = getComputedStyle(document.body).backgroundColor || '#fff';
+  ctx.fillStyle = paper;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.setTransform(k, 0, 0, k, 0, 0);
   ctx.drawImage(img, 0, 0);
-  return { dataUrl: canvas.toDataURL('image/png'), width: w, height: h };
+
+  // Some locations export at a fixed frame size, measured from the top-left corner,
+  // so the pictures line up with each other in the write-up. A board taller or wider
+  // than the frame is cut off; a smaller one is padded.
+  const frame = EXPORT_FRAMES[activeLocation];
+  if (frame) {
+    const out = document.createElement('canvas');
+    out.width = frame.w;
+    out.height = frame.h;
+    const octx = out.getContext('2d');
+    octx.fillStyle = paper;
+    octx.fillRect(0, 0, out.width, out.height);
+    octx.drawImage(canvas, 0, 0);
+    return { dataUrl: out.toDataURL('image/png'), width: out.width, height: out.height };
+  }
+  return { dataUrl: canvas.toDataURL('image/png'), width: canvas.width, height: canvas.height };
 }
 
 document.getElementById('exportBtn').addEventListener('click', async () => {
@@ -2162,7 +2239,7 @@ document.getElementById('exportBtn').addEventListener('click', async () => {
     document.body.appendChild(a);
     a.click();
     a.remove();
-    note.textContent = 'saved ' + width + '×' + height + ' (2×)';
+    note.textContent = 'saved ' + width + '×' + height;
   } catch (err) {
     note.textContent = 'export failed: ' + err.message;
   } finally {
